@@ -12,7 +12,7 @@ x0 = [10;10];           % initial state
 
 
 %% EXO 1
-N = 10;                % horizon
+N = 8;                % horizon
 Q = C'*C + 0.001*eye(n); % output weighting matrix
 R = 0.001;               % control weighting matrix
 
@@ -34,7 +34,7 @@ x = x0;
 
 for i=1:max_simu_step
     if sum(i==pred_points)
-        x_pred(count:count+N,:) = predict_on_horizon(A,B,K_lqr,N,x);
+        y_pred(count:count+N,:) = predict_on_horizon(A,B,C,K_lqr,N,x);
         count = count+N;
     end
     x_stored(i,:) = x;
@@ -56,13 +56,14 @@ legend('Output sequence','Control sequence');
 title(strcat('Output and control sequence for the closed loop with LQR control (N=',num2str(N),')'));
 
 %figure;
-subplot(1,2,2); plot(x_stored(:,1),x_stored(:,2),'b-o','LineWidth',1.5);
+subplot(1,2,2); plot(y_stored(:,1),'b-o','LineWidth',1.5);
 hold on;
-plot(x_pred(1:N,1),x_pred(1:N,2),'-.','Color',[0.8,0.8,0.8],'LineWidth',2)
-plot(x_pred(N+1:2*N,1),x_pred(N+1:2*N,2),'-.','Color',[0.6,0.6,0.6],'LineWidth',2)
-plot(x_pred(2*N+1:3*N,1),x_pred(2*N+1:3*N,2),'-.','Color',[0.4,0.4,0.4],'LineWidth',2)
+plot((pred_points(1):(pred_points(1)+N-1)),y_pred(1:N,1),'-.','Color',[0.8,0.8,0.8],'LineWidth',3)
+plot((pred_points(2):pred_points(2)+N-1),y_pred(N+1:2*N,1),'-.','Color',[0.6,0.6,0.6],'LineWidth',3)
+plot((pred_points(3):pred_points(3)+N-1),y_pred(2*N+1:3*N,1),'-.','Color',[0.4,0.4,0.4],'LineWidth',3)
 
-title(strcat('State trajectory and predicted trajectories for the closed loop with LQR control (N=',num2str(N),')'));
+title(strcat('Output trajectory and predicted trajectories for the closed loop with LQR control (N=',num2str(N),')'));
+
 
 %% EXO 3
 
