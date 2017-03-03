@@ -21,6 +21,7 @@ K_lqr = lqr_ricatti_solver(A,B,Q,R,N);  % feedback laws for lqr optimal control 
 K = K_lqr(1,:);                         % first step feedback law
 
 
+
 %% EXO 2
 max_simu_step = 40;                 % simulation steps
 u_stored = zeros(max_simu_step,1);  % control container
@@ -51,7 +52,7 @@ end
 
 %plots
 figure('units','normalized','outerposition',[0 0 1 1]);
-subplot(1,2,1); stairs(y_stored,'b-.','LineWidth',2); hold on; stairs(u_stored,'r-.','LineWidth',2);
+subplot(1,2,1); stairs(y_stored,'b:d','LineWidth',1.5,'MarkerSize',5); hold on; stairs(u_stored,'r:d','LineWidth',1.5,'MarkerSize',5);
 legend('Output sequence','Control sequence');
 title(strcat('Output and control sequence for the closed loop with LQR control (N=',num2str(N),')'));
 
