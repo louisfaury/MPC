@@ -29,14 +29,13 @@ title('Output sequence for the uncontrolled system : u=0');
     
 
 %% EXO 1
-N = 8;                % horizon
+N = 8;                   % horizon
 Q = C'*C + 0.001*eye(n); % output weighting matrix
 R = 0.001;               % control weighting matrix
 
 % dynamic programming solving for lqr
-[K_lqr, ~] = lqr_ricatti_solver(A,B,Q,R,N);  % feedback laws for lqr optimal control over horizon of size N
-K = K_lqr(1,:);                         % first step feedback law
-
+[K_lqr, ~] = lqr_ricatti_solver(A,B,Q,R,N); % feedback laws for lqr optimal control over horizon of size N
+K = K_lqr(1,:);                             % first step feedback law
 
 
 %% EXO 2
@@ -46,7 +45,7 @@ y_stored = zeros(max_simu_step,1);  % output container
 x_stored = zeros(max_simu_step,2);  % state container
 y_pred = zeros(3*N,1);              % predicted output container
 x_pred = zeros(3*N,2);              % prediced state container
-pred_points = [1,3,8];            % for plotting purposes
+pred_points = [1,3,8];              % for plotting purposes
 count = 1;                              
 x = x0;
 
@@ -91,7 +90,7 @@ title(strcat('Output trajectory and predicted trajectories for the closed loop w
 max_simu_step = 40;                         % simulation steps
 inf_y_stored = zeros(max_simu_step,1);      % output container
 inf_u_stored = zeros(max_simu_step,1);      % output container
-inf_cost_stored = zeros(max_simu_step,1);    % cost container    
+inf_cost_stored = zeros(max_simu_step,1);   % cost container    
 x = x0;
 
 for i=1:max_simu_step
@@ -111,14 +110,14 @@ end
 
 %approximated infinite horizon lqr
 %same as EX2 with N=7
-N_lim = 7;                                      % infinite horizon simulation
-max_simu_step = 40;                                % simulation steps
-Nlim_y_stored = zeros(max_simu_step,1);      % output container
-Nlim_cost_stored = zeros(max_simu_step,1);    % cost container 
+N_lim = 7;                                  % infinite horizon simulation
+max_simu_step = 40;                         % simulation steps
+Nlim_y_stored = zeros(max_simu_step,1);     % output container
+Nlim_cost_stored = zeros(max_simu_step,1);  % cost container 
 x = x0;
 
 % dynamic programming solving for lqr
-[K_lqr, H0_lqr] = lqr_ricatti_solver(A,B,Q,R,N_lim);  % feedback laws for lqr optimal control over horizon of size N
+[K_lqr, H0_lqr] = lqr_ricatti_solver(A,B,Q,R,N_lim); % feedback laws for lqr optimal control over horizon of size N
 K = K_lqr(1,:);                                      % first step feedback law
 
 for i=1:max_simu_step
