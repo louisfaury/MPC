@@ -1,2 +1,7 @@
 *.m~
 *.sty
+*.aux
+*.out
+*.pdf
+*.log
+*.gz
