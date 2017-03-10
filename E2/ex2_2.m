@@ -1,7 +1,12 @@
 %%%
 % MPC-425, Exercise 2
 %%%
+
 function ex2
+
+clc;
+clear;
+close all;
 
 % Problem:
 %  min  0.5 * z' * prob.H * z + prob.q' * z
@@ -15,10 +20,13 @@ seed  = ceil(100*rand); % Set to any integer to choose the randomly generated pr
 
 [prob,opt] = setupEx2(dim, speed, seed);
 
-% Change this parameter for exercise 2
-solveTime_list = zeros(1, n_iter);
-newtonIter_list = zeros(1, n_iter);
-mu_list = logspace(log10(opt.epsilon), -0.5, n_iter);
+%% Exercise 2 : solving the same optmisation problem for different mu
+solveTime_list = zeros(1, n_iter); %storing solving time
+newtonIter_list = zeros(1, n_iter); %storing number of inner iterations
+mu_list = logspace(log10(opt.epsilon), -0.5, n_iter); %varying mu
+
+
+
 for i=1:n_iter
     
     opt.mu = mu_list(1,i);
@@ -59,7 +67,7 @@ for i=1:n_iter
             % fullHessian*Dz = -fullGrad
             fullHessian = prob.H + kappa*sum1;
             fullGrad = prob.H*z+prob.q+kappa*sum2;
-            Dz = -inv(fullHessian)*fullGrad;
+            Dz = -linsolve(fullHessian,fullGrad);
             
             %^^^^^^^^^^^^^^^^ YOUR CODE HERE ^^^^^^^^^^^^^^^^^^^
             
@@ -113,10 +121,23 @@ for i=1:n_iter
     solveTime_list(1,i) = stats.solveTime;
     newtonIter_list(1,i) = stats.innerIterations;
 end
+
+
+%%plotting curves
 figure
-semilogx(mu_list, solveTime_list)
+semilogx(mu_list, solveTime_list, ':bs');
+xlabel('mu')
+ylabel('Solve time(s)')
+set(gca,'fontsize', 14, 'linewidth', 2);
+
+
 figure
-semilogx(mu_list, newtonIter_list)
+semilogx(mu_list, newtonIter_list, ':bs')
+xlabel('mu')
+ylabel('Number of inner iterations')
+set(gca,'fontsize', 14, 'linewidth', 2);
+
+
 end
 
 function [prob, opt] = setupEx2(dim, speed, seed)

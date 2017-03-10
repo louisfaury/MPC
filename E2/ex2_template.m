@@ -1,7 +1,13 @@
 %%%
 % MPC-425, Exercise 2
 %%%
+
+
 function ex2
+
+clc;
+clear;
+close all;
 
 % Problem:
 %  min  0.5 * z' * prob.H * z + prob.q' * z
@@ -9,7 +15,7 @@ function ex2
 
 %% Choose problem parameters
 dim   = 2; % Number of optimization variables
-speed = 'fast'; % set to 'fast' for fast convergence, and 'slow' to see what's going on
+speed = 'slow'; % set to 'fast' for fast convergence, and 'slow' to see what's going on
 seed  = ceil(100*rand); % Set to any integer to choose the randomly generated problem
 
 [prob,opt] = setupEx2(dim, speed, seed);
@@ -42,17 +48,17 @@ while kappa > opt.epsilon % Stop once the barrier term is small
 
     % Compute search direction 
     
-    %Computing matrix sum(1/(di-giz)2*gi.Tgi)
+    % Computing matrix sum(1/(di-giz)2*gi.Tgi)
     sum1 = (repmat(1./(prob.d-prob.G*z).^2, 1, size(z, 1)).*prob.G)'*prob.G;
     
     
-    %Computing vector sum(1/(di-giz)*gi.T)
+    % Computing vector sum(1/(di-giz)*gi.T)
     sum2 = sum((repmat(1./(prob.d-prob.G*z), 1, size(z, 1)).*prob.G), 1)';
     
-    % fullHessian*Dz = -fullGrad
+    % Solving fullHessian*Dz = -fullGrad
     fullHessian = prob.H + kappa*sum1;
     fullGrad = prob.H*z+prob.q+kappa*sum2;
-    Dz = -inv(fullHessian)*fullGrad;
+    Dz = -linsolve(fullHessian,fullGrad);
 
     %^^^^^^^^^^^^^^^^ YOUR CODE HERE ^^^^^^^^^^^^^^^^^^^
 
