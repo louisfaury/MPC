@@ -5,5 +5,5 @@
 *.pdf
 *.log
 *.gz
-.DS_Store
+**/*.DS_Store
 **/*.m~

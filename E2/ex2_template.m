@@ -21,7 +21,7 @@ seed  = ceil(100*rand); % Set to any integer to choose the randomly generated pr
 [prob,opt] = setupEx2(dim, speed, seed);
 
 % Change this parameter for exercise 2
-% opt.mu      = 1e-2;
+ opt.mu      = 5e-3;
 
 
 %%%%%%%%%%%%%%%%%%% THE BARRIER METHOD %%%%%%%%%%%%%%%%%%%
