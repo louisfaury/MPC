@@ -1,0 +1,35 @@
+%!TEX encoding = IsoLatin
+
+%% Document is article 
+\documentclass[a4paper]{article}
+
+%% ----------------------------------------------------- PACKAGES ----------------------------------------------------- %%
+\usepackage{coolArticle}
+\usepackage{caption}
+
+%% ---------------------------------------------------- DOCUMENT ---------------------------------------------------- %%
+\begin{document}
+
+\noindent \textsc{Gallois-Montbrun} Grégoire\\
+\textsc{Faury} Louis 
+	\titlebox{0.6}{Model Predictive Control}{Exercise \#2 - \textcolor{blue}{Group 2}}
+	
+	\section{Exercise 1}
+	{
+		\paragraph{} We implemented the Barrier method using the pseudo-code given in the exercise sheet. We provide here three illustrations of convergence toward a feasible optimum, for randomly generated QP problems, with inequality constraints. 
+		% TODO : figure x3,4 ?  
+		
+		\paragraph{} One can notice that we indeed first converge toward the central path (more precisely the analytical center, providing a minimum for the initial settings for our objective function combined with a logarithmic penalty function), before actually converging along the central path to the constrained optimization problem solution. 
+		
+		\paragraph{} We can try to vary $\mu$ to see how it affects convergence. When $\mu$ is to close to 1, we sometimes witness the algorithm doesn't converge because it has a too rigid criterion for convergence. Indeed, since $\kappa$ remains sensibly the same, the algorithm feels it stayed on the same point despite its iterations, and therefore assume it has reached the feasible solution. On the other hand, with $\kappa$ small enough, convergence is obtained much quicker since after reaching the analytical center (still with the \emph{slow} setting), we make jumps on $\kappa$ big enough so that our penalty functions quickly approximates an indicator function for the feasible set. This won't hold for the \emph{fast} settings since we won't wait for convergence to the analytical center to shift the value of $\kappa$. 
+	}
+	
+	\section{Exercice 2}
+	{
+		\paragraph{} We provide hereinafter the evolution of inner loop iterations and computation time with respect to the value of $\mu$, which commands the evolution of $\kappa$ between to outer loop iterations. All plots are given for the \emph{same randomly generated problem}. The other hyper-parameters are fixed by the \emph{fast} flag parameter. 
+		
+		\paragraph{} We note, as discussed hereinbefore, that for smaller values of $\mu$, we reach convergence \textcolor{red}{faster} than for greater (close to $1$) values. However, we can note that for very small values of $\mu$ ($\simeq \eps = 10^{-8}$), convergence is not reached since $\kappa$ is believed to be 0 : after one more outer loop, the algorithm stops (since $\kappa$ remains the same, and so for the  corresponding optimization problem). Hence, the first value of the different plots have to be treated with caution, since they do not correspond to fully solved optimization problems. 
+	}
+
+
+\end{document}
