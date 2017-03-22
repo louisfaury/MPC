@@ -52,7 +52,7 @@
 	{
 		\paragraph{} We provide hereinafter the evolution of inner loop iterations and computation time with respect to the value of $\mu$, which commands the evolution of $\kappa$ between two outer loop iterations. All plots are given for the \emph{same randomly generated problem}. The other hyper-parameters are fixed by the \emph{fast} flag parameter. 
 		
-				\begin{figure}[h!]
+		\begin{figure}[h!]
 			\begin{minipage}{0.5\linewidth}
 				\includegraphics[width=\linewidth]{mu_time}
 				\caption{Convergence time with respect to $\mu$}
@@ -66,6 +66,23 @@
 		\end{figure}
 		
 		\paragraph{} We note, as discussed hereinbefore, that for smaller values of $\mu$, we reach convergence \textcolor{red}{faster} than for greater (close to $1$) values. However, we can note that for very small values of $\mu$ ($\simeq \eps = 10^{-8}$), convergence is not reached since $\kappa$ is believed to be 0 : after one more outer loop, the algorithm stops (since $\kappa$ remains the same, and so for the  corresponding optimization problem). Hence, the first value of the different plots have to be treated with caution, since they do not correspond to fully solved optimization problems. 
+		
+				\begin{figure}[h!]
+			\begin{minipage}{0.5\linewidth}
+				\includegraphics[width=\linewidth]{mu_time_50}
+				\caption{Convergence time with respect to $\mu$, $d=50$}
+				\label{mu_time_50}
+			\end{minipage}
+			\begin{minipage}{0.5\linewidth}
+				\includegraphics[width=\linewidth]{mu_it_50}
+				\caption{Inner iterations number with respect to $\mu$, $d=50$}	
+				\label{mu_it_50}			
+			\end{minipage}
+		\end{figure}
+		
+		\paragraph{} We can repeat that experiment for a state space of dimension 50. We expect the computation time to be bigger (due to the resolution of a 50*50 system, instead of a 2*2). As shown if figure (\ref{mu_time_50}), the computation time is indeed higher. If one can naively expect a solving time ratio of $\frac{50^3}{2^3}$ (naive cost of inverting the Hessian), this does not show that expressively here since this operation is not the longest one performed by Matlab (Matlab solves the system using precompiled code, while its interpreter still has to iterate through our loop). We also expect the number of iterations needed for solving the problem to be larger since there are more independent directions to explore, which is confirmed by figure (\ref{mu_it_50}). 
+		
+
 	}
 
 

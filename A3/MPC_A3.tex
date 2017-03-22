@@ -1,0 +1,117 @@
+%!TEX encoding = IsoLatin
+
+%% Document is article 
+\documentclass[a4paper]{article}
+
+%% ----------------------------------------------------- PACKAGES ----------------------------------------------------- %%
+\usepackage{coolArticle}
+\usepackage{algorithm2e}
+
+%% ---------------------------------------------------- DOCUMENT ---------------------------------------------------- %%
+\begin{document}
+
+	\titlebox{0.5}{Model Predictive Control - A3}{Intro to Constrained Optimization}
+	
+	\paragraph{} As part of the MPC solving problem, we tack the standard optimization program : 
+	\begin{equation}
+		\min_z f(z) \text{ s.t } \left\{ \begin{aligned} &h_i(z) = 0, \quad i\in\mathcal{E} \\ &g_i(z) \leq 0 , \quad i\in\mathcal{I} \end{aligned}\right.
+	\end{equation}
+	
+	with the usual \emph{convex hypothesis} : 
+	\begin{equation}
+		\min_z f(z) \text{ s.t } \left\{ \begin{aligned} &Cz= b, \quad i\in\mathcal{E} \\ &g(z) \leq 0 , \quad i\in\mathcal{I} \end{aligned}\right.
+	\end{equation}
+	with $f, g_1,\hdots, g_m$ are convex, and the multi-dimensional "$\leq$" in understood row-wise. As indicated, equality constraints are affine. Those ensure that the \emph{feasible set is convex}, and that any local optima is actually global. 
+	
+	\section{Linear and quadratic program}
+	{
+		\paragraph{} Linear programs designate problems where inequality conditions and objective functions are linear : 
+		\begin{equation}
+			\min_z c^Tz \text{ s.t } \left\{ \begin{aligned} &Cz= b, \quad i\in\mathcal{E} \\ &Gz \leq d , \quad i\in\mathcal{I} \end{aligned}\right.
+		\end{equation}
+		The resulting feasible set is therefore a polyhedron. 
+		
+		\paragraph{} Quadratic programs are identical problems, except with a quadratic objective function : 
+		\begin{equation}
+			f(z) = \frac{1}{2} z^T H z + q^T z + r, \quad H\in\mathcal{S}_n^{++}(\mathbb{R}) \\
+		\end{equation}
+	}
+		
+	\section{Interior point methods for MPC}
+	{
+		\paragraph{} Let us consider the inequality constrained problem : 
+		\begin{equation}
+			\min_z f(z) \text{ s.t } g(z)\leq 0
+		\end{equation}
+		and assume it holds a feasible solution. 
+		
+		\subsection{Barrier penalty method}
+		{
+			\paragraph{} The Barrier method is a constraint penalization method that use a $\log$ function to approximate the indicator function for the feasible set. We now tackle the unconstrained problem : 
+			\begin{equation}
+				\min_z f(x)  + \kappa \phi(z)
+			\end{equation}
+			with 
+			\begin{equation}
+				\phi(z) = \sum_{i=1}^m \log{(-g_i(z))}
+			\end{equation}
+			Therefore, $\kappa\to 0$ gives a smooth asymptotical approximation for the indicator we mentioned hereinbefore. 
+			What's more, for all $z$ in the feasible set : 
+			\begin{equation}
+				\left\{\begin{aligned}
+					&\grad[z]{\phi(z)} =  - \sum_{i=1}^m \frac{1}{g_i(z)}\grad{z}{g_i(z)}\\
+					&\grad[z][2]{\phi(z)} = -\sum_{i=1}^m \left[ \frac{1}{g_i(z)^2}\grad{g_i(z)}\grad{g_i(z)}^T - \frac{1}{g_i(z)}\grad[z][2]{g_i(z)}\right]
+				\end{aligned}\right.
+			\end{equation}
+			
+			\paragraph{} Now let $z^*(\kappa)$ be the minimizer of : 
+			\begin{equation}
+				\min_z f(z) + \kappa \phi(z) 
+			\end{equation}
+			$z^*(\kappa)$ is trapped, thanks to the penalty function, inside the feasible set. The sequence : 
+			\begin{equation}
+				\{z^*(\kappa)\}_{\kappa > 0} 
+			\end{equation}
+			is called the \textcolor{red}{central path}. 
+			\vspace{10pt}
+			
+			\coolbox{red}{\textcolor{black}{Barrier Interior Point Algorithm}}
+			{
+				\begin{algorithm}[H]
+	 					\SetAlgoLined
+						\LinesNumbered
+						\emph{\textsf{1. Initialize}} $z_0\in\Omega$, $\kappa = \kappa^{(0)}$, $0<\mu<1$, tolerance $\eps$.\\
+						\BlankLine
+						\BlankLine
+						\emph{\textsf{2. Repeat}} : \\
+						\Indp \Indp 
+							Find $z^*(\kappa)$ (GD, ND,..)\\
+							$z_0 \leftarrow z^*(\kappa)$\\	
+							$\kappa \leftarrow \mu \kappa	$\\
+						\Indm \Indm 
+						until $m\kappa \leq \eps$.
+						\end{algorithm}
+			}
+			
+			\paragraph{} For finding $z^*(\kappa)$, the Newton direction $n_k$ solves : 
+			\begin{equation}
+				\left[ \grad[z][2]{f_k} + \kappa \grad[z][2]{\phi_k}\right] n_k = -\left( \grad[z]{f_k} + \kappa \grad[z]{\phi_k}\right)
+			\end{equation}
+		}
+		
+		\subsection{Barrier Method for QP}
+		{
+			\paragraph{} Let us consider the QP problem : 
+			\begin{equation}
+				\min_z \frac{1}{2}{z^THz} \quad \text{s.t } \quad Gz \leq d 
+			\end{equation}
+			The algorithm stays the same, but we have an analytical formula for the Newton descent direction : 
+			
+			\begin{equation}
+				\left[ H + \kappa \sum_{i=1}^m \frac{1}{(d_i-g_iz_k)^2} g_i^Tg_i\right] n_k = \left[ Hz_k - \sum_{i=1}^m \frac{1}{d_i-g_iz_k}g_i^T\right]
+			\end{equation}
+			where $g_i$ are denoting the rows of the inequality constraint matrix $G$. 
+		}
+	}
+
+\end{document}
