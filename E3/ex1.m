@@ -10,7 +10,7 @@
  A = [  
         cos(alpha) , sin(alpha) ; 
         -sin(alpha), cos(alpha)
-     ];
+     ]*beta;
  H = [ 
         cos(pi/3)  , sin(pi/3)  ;
         -cos(pi/3) , -sin(pi/3) ;
@@ -41,16 +41,16 @@
  
  %% Task 2 : trajectory plots
  
- x_out = [-2;0.5];
- x_in = {[0;0],[0;0.2],[0.4;0],[0; 0.6], [0.8; 0], [0; 1]};
+ x_out = [-3;2.2];
+ x_in = {[-3;1.5],[-2;1],[-1;1.5],[0; 1.2], [1.4; 0], [2; 1], [-1; 0]};
  
  traj_out = simulate_traj(A, x_out, 20, X);
- plot(traj_out(1,:),traj_out(2,:),'o-','MarkerSize',8,'MarkerEdgeColor',[0.1,0.1,0.1],'MarkerFaceColor',[0.1,0.1,0.1]);
+ plot(traj_out(1,:),traj_out(2,:),'bo-','MarkerSize',8,'MarkerEdgeColor',[0.1,0.1,0.1],'MarkerFaceColor',[0.1,0.1,0.1]);
  plot(x_out(1),x_out(2),'s','MarkerSize',10,'MarkerEdgeColor',[0.1,0.1,0.1],'MarkerFaceColor',[0.99,0.99,0.99]);
 
  for x=cell2mat(x_in)
     traj_in = simulate_traj(A, x, 20, X);
-    plot(traj_in(1,:),traj_in(2,:),'o-','MarkerSize',5,'MarkerEdgeColor',[0.1,0.1,0.1],'MarkerFaceColor',[0.1,0.1,0.1]);
+    plot(traj_in(1,:),traj_in(2,:),'bo-','MarkerSize',5,'MarkerEdgeColor',[0.1,0.1,0.1],'MarkerFaceColor',[0.1,0.1,0.1]);
     plot(x(1),x(2),'s','MarkerSize',6,'MarkerEdgeColor',[0.1,0.1,0.1],'MarkerFaceColor',[0.99,0.99,0.99]);
  end
   
