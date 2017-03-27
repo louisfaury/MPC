@@ -26,13 +26,16 @@
  convergence = false;   % convergence flag
  O = X;                 % current estimate for O_infinity
 
- % computing largest invariant set
+ %! ------------------------------------------------------ !%
+ %         computing largest invariant set                  %
+ %! ------------------------------------------------------ !%
  while (~convergence)
      Op = Polyhedron(O.A*A,O.b);                    % current Omega pre-set
      On = Polyhedron( [Op.A;O.A] , [Op.b;O.b] );    % update rule
      convergence = (O == On);                       % convergence check
      O = On;                                        % update 
  end
+ %! ------------------------------------------------------ !%
  
  plot([X,O]); hold on;
  l = legend('$\bf{X}$','$\mathcal{O}_\infty$');
@@ -41,7 +44,7 @@
  %% Task 2 : trajectory plots
  
  x_out = [-3;2.2];
- x_in = {[-3;1.5],[-2;1],[-1;1.5],[0; 1.2], [1.4; 0], [2; 1], [-1; 0]};
+ x_in = {[-3;1.5],[-2;1],[-1;1.5],[0; 1.2], [1.4; 0], [2; 1], [-1; 0],[-3.87;1.08]};
  
  traj_out = simulate_traj(A, x_out, 20, X);
  plot(traj_out(1,:),traj_out(2,:),'bo-','MarkerSize',8,'MarkerEdgeColor',[0.1,0.1,0.1],'MarkerFaceColor',[0.1,0.1,0.1]);

@@ -29,13 +29,17 @@
  convergence = false;   % convergence flag
  Oc = X;                 % current estimate for O_infinity
 
- % computing largest invariant set
+ 
+ %! ------------------------------------------------------ !%
+ %      computing largest control invariant set             %
+ %! ------------------------------------------------------ !%
  while (~convergence)
      Op = projection(Polyhedron([ Oc.A*A,Oc.A*B ; zeros(2,2),G ], [Oc.b;g]),(1:2) );   % current Omega pre-set
      On = Polyhedron( [Op.A;Oc.A] , [Op.b;Oc.b] );                       % update rule
      convergence = (Oc == On);                                           % convergence check
      Oc = On;                                                            % update 
  end
+ %! ------------------------------------------------------ !%
  
  plot([X,Oc]); hold on;
  l = legend('$\bf{X}$','$\mathcal{C}_\infty$');
@@ -53,13 +57,18 @@
  convergence = false;   % convergence flag
  O_lqr = X_lqr;         % current estimate for O_infinity
 
- % computing largest invariant set
+ %! ------------------------------------------------------ !%
+ %      computing largest invariant set for lqr             %
+ %! ------------------------------------------------------ !%
  while (~convergence)
      Op = Polyhedron(O_lqr.A*A,O_lqr.b);                    % current Omega pre-set
      On = Polyhedron( [Op.A;O_lqr.A] , [Op.b;O_lqr.b] );    % update rule
      convergence = (O_lqr == On);                           % convergence check
      O_lqr = On;                                            % update 
  end
+  %! ------------------------------------------------------ !%
+
+  
  figure;
  plot([X,Oc,X_lqr,O_lqr]); hold on;
  l = legend('$\bf{X}$','$\mathcal{C}_\infty$','$\bf{X}^{lqr}$','$\mathcal{O}_\infty^{lqr}$');
