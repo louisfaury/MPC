@@ -33,11 +33,10 @@
      convergence = (O == On);                       % convergence check
      O = On;                                        % update 
  end
- O.plot;
  
  plot([X,O]); hold on;
  l = legend('$\bf{X}$','$\mathcal{O}_\infty$');
- set(l,'Interpreter','latex');
+ set(l,'Interpreter','latex','FontSize',14);
  
  %% Task 2 : trajectory plots
  
