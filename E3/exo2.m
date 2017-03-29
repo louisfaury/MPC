@@ -29,15 +29,14 @@
  convergence = false;   % convergence flag
  Oc = X;                 % current estimate for O_infinity
 
- 
  %! ------------------------------------------------------ !%
  %      computing largest control invariant set             %
  %! ------------------------------------------------------ !%
  while (~convergence)
-     Op = projection(Polyhedron([ Oc.A*A,Oc.A*B ; zeros(2,2),G ], [Oc.b;g]),(1:2) );   % current Omega pre-set
-     On = Polyhedron( [Op.A;Oc.A] , [Op.b;Oc.b] );                       % update rule
-     convergence = (Oc == On);                                           % convergence check
-     Oc = On;                                                            % update 
+     Op = projection(Polyhedron([ Oc.A*A,Oc.A*B ; zeros(2,2),G ], [Oc.b;g]),(1:2) );    % current Omega pre-set
+     On = Polyhedron( [Op.A;Oc.A] , [Op.b;Oc.b] );                                      % update rule
+     convergence = (Oc == On);                                                          % convergence check
+     Oc = On;                                                                           % update 
  end
  %! ------------------------------------------------------ !%
  

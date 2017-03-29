@@ -1,4 +1,7 @@
 function traj = simulate_traj(dynamic, start, max_iter, constraint)
+% \brief :  Simulate the trajectory driven by the dynamic matrix starting at
+%           start point, until max iter is reached or the running points stops
+%           complying with the constraints   
 
 iter = 1;
 x = start;

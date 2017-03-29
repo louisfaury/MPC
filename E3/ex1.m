@@ -41,8 +41,8 @@
  l = legend('$\bf{X}$','$\mathcal{O}_\infty$');
  set(l,'Interpreter','latex','FontSize',14);
  
- %% Task 2 : trajectory plots
  
+ %% Task 2 : trajectory plots
  x_out = [-3;2.2];
  x_in = {[-3;1.5],[-2;1],[-1;1.5],[0; 1.2], [1.4; 0], [2; 1], [-1; 0],[-3.87;1.08]};
  
