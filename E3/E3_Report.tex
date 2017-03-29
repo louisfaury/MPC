@@ -118,15 +118,14 @@
 		G = \begin{bmatrix}1 \\ -1\end{bmatrix}, \quad g =\begin{bmatrix}0.5 \\ 0.5\end{bmatrix}
 		\end{equation}
 		
-		\begin{figure}[h!]
+		\begin{figure}[h!]\label{fig::max_Ctrlinv}
 				\centering
 				\includegraphics[scale=0.5]{ctrld_invariant_set}
-				\label{fig::max_Ctrlinv}
 				\caption{Feasible and maximum controlled invariant set}
 		\end{figure}
 		
 		\paragraph{}
-		The maximum controlled invariant is displayed on figure (\ref{fig::max_Ctrlinv}). We of course  have $\mathcal{C}_\infty\subset\mathbb{X}$. We also have $\mathcal{O}_\infty\subset\mathcal{C}_\infty$, all points in $\mathcal{O}_\infty$ indeed correspond to the particular case where $u=0$ ($\left\{0\right\}\subset\mathbb{U}$).
+		The maximum controlled invariant set is displayed on figure (\ref{fig::max_Ctrlinv}). We of course  have $\mathcal{C}_\infty\subset\mathbb{X}$. We also have $\mathcal{O}_\infty\subset\mathcal{C}_\infty$, all points in $\mathcal{O}_\infty$ indeed correspond to the particular case where $u=0$ ($\left\{0\right\}\subset\mathbb{U}$).
 		
 		
 		\paragraph{} $\color{red}\blacktriangleright$ We now consider the system controlled by the optimal LQR control sequence $u^*$ corresponding to the following optimization problem:
@@ -164,10 +163,9 @@
 		Its maximum invariant set $\mathcal{O}^{lqr}_\infty$ is then computed applying algorithm (1), following the same principle as in the previous exercise. Figure (\ref{fig::invariant_lqr}) shows the different sets computed so far. We notice that $\mathcal{O}_\infty^{lqr}\subset\mathcal{C}_\infty$ due to the fact that the new defined LQR controlled system corresponds to a particular case of the system defined as equation (\ref{controlled}). $\mathcal{O}_\infty^{lqr}$ is therefore smaller than $\mathcal{C}_\infty$.We could also expect $\mathcal{O}_{\infty}^{lqr}$ to be smaller than $\mathcal{C}_\infty$ since the LQR system already has a feasible set $\mathbb{X}^{lqr}$ strictly included in the original feasible set $\mathbb{X}$.
 		
 		
-		\begin{figure}[h!]
+		\begin{figure}[h!]\label{fig::invariant_lqr}
 				\centering
 				\includegraphics[scale=0.5]{lqr_sets}
-				\label{fig::invariant_lqr}
 				\caption{$\mathbb{X}$,  $\mathbb{X}^{lqr}$, $\mathcal{C}^\infty$ and $\mathcal{O}_\infty^{lqr}$}
 		\end{figure}
 		
