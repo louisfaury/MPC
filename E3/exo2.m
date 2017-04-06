@@ -60,7 +60,7 @@
  %      computing largest invariant set for lqr             %
  %! ------------------------------------------------------ !%
  while (~convergence)
-     Op = Polyhedron(O_lqr.A*A,O_lqr.b);                    % current Omega pre-set
+     Op = Polyhedron(O_lqr.A*(A+B*K),O_lqr.b);                    % current Omega pre-set
      On = Polyhedron( [Op.A;O_lqr.A] , [Op.b;O_lqr.b] );    % update rule
      convergence = (O_lqr == On);                           % convergence check
      O_lqr = On;                                            % update 
