@@ -38,31 +38,31 @@ Vf = @(x) x'*P*x;           % terminal cost
   %! ------------------------------------------------------ !%
   
 %  % Results 
-%  algo_res.weight = P;
-%  algo_res.set = O_lqr;
-%  algo_res.controller = -Klqr;
-%  
-%  % Verifies result with MPT3
-%  sys = LTISystem('A',A,'B',B);
-%  sys.x.max = [5; 0.2]; sys.x.min = [-5; -0.2];
-%  sys.u.max = 1.75; sys.u.min = -1.75;
-%  sys.x.penalty = QuadFunction(Q);
-%  sys.u.penalty = QuadFunction(R);
-%  mpt_res.weight = sys.LQRPenalty.weight;
-%  mpt_res.set = sys.LQRSet;
-%  mpt_res.controller = sys.LQRGain;
-%  
-%  % display 
-%  disp('Boolean value for equality between sets :')
-%  disp(mpt_res.set==algo_res.set);
-%  disp('MPT terminal state :');
-%  disp(mpt_res.weight); 
-%  disp('Our terminal state :');
-%  disp(algo_res.weight);
-%  disp('MPT terminal gain :');
-%  disp(mpt_res.controller); 
-%  disp('Our terminal gain :');
-%  disp(algo_res.controller);
+ algo_res.weight = P;
+ algo_res.set = O_lqr;
+ algo_res.controller = -Klqr;
+ 
+ % Verifies result with MPT3
+ sys = LTISystem('A',A,'B',B);
+ sys.x.max = [5; 0.2]; sys.x.min = [-5; -0.2];
+ sys.u.max = 1.75; sys.u.min = -1.75;
+ sys.x.penalty = QuadFunction(Q);
+ sys.u.penalty = QuadFunction(R);
+ mpt_res.weight = sys.LQRPenalty.weight;
+ mpt_res.set = sys.LQRSet;
+ mpt_res.controller = sys.LQRGain;
+ 
+ % display 
+ disp('Boolean value for equality between sets :')
+ disp(mpt_res.set==algo_res.set);
+ disp('MPT terminal state :');
+ disp(mpt_res.weight); 
+ disp('Our terminal state :');
+ disp(algo_res.weight);
+ disp('MPT terminal gain :');
+ disp(mpt_res.controller); 
+ disp('Our terminal gain :');
+ disp(algo_res.controller);
      
  
  %% Question 2
