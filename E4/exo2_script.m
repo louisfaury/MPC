@@ -17,7 +17,6 @@ R = 1;
 N = 10;
 X = Polyhedron(Hx,hx);
 
- 
  % Computing LQR controller and LQR terminal with MPT3
  sys = LTISystem('A',A,'B',B);
  sys.x.max = [5; 0.2]; sys.x.min = [-5; -0.2];
@@ -37,9 +36,9 @@ X = Polyhedron(Hx,hx);
      traj(i,:) = x;
      
      uopt = mpc_yalmip_controller(N,A,B,Q,mpt_res.weight,R,x,Hx,hx,Hu,hu, mpt_res.set);
-
-    x = A*x+B*uopt(1);
-    control(i) = uopt(1);
+     
+     x = A*x+B*uopt(1);
+     control(i) = uopt(1);
  end
  
  % plots
