@@ -9,14 +9,14 @@ x = sdpvar(repmat(2,1,N+1),ones(1,N+1));
 con = [];
 obj = 0;
 for i = 1:N
-    con = [con , x{i+1} == A*x{i} + B*u{i}];  % System dynamics
+    con = [con , x{i+1} == A*x{i} + B*u{i}];   % System dynamics
     con = [con , Hx*x{i+1} <= hx];            % State constraints
     con = [con , Hu*u{i} <= hu];              % Input constraints
-    obj = obj + x{i+1}'*Q*x{i+1} + u{i}'*R*u{i};  % Cost function
+    obj = obj + x{i}'*Q*x{i} + u{i}'*R*u{i};  % Cost function
 end
 
-con = [con, Xf.A*x{N+1} <= Xf.b];   % Terminal constraint
-obj = obj + x{N+1}'*P*x{N+1};       % Terminal weight
+con = [con, Xf.A*x{N+1} <= Xf.b]; % Terminal constraint
+obj = obj + x{N+1}'*P*x{N+1};    % Terminal weight
 
 % Compile the matrices
 ctrl = optimizer(con, obj, [],x{1},[u{:}]);
