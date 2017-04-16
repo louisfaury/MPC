@@ -1,0 +1,61 @@
+% @file : coolMath.sty
+% @author : Louis Faury
+% @date : 
+% @brief : Math. functions (mostly prob. related)
+
+%Identification 
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{coolmath}[05/11/2016 Cool Math Package]
+
+
+\RequirePackage{amsmath}
+\RequirePackage{amsthm}
+\RequirePackage{mathrsfs}
+\RequirePackage{amssymb}
+
+
+%% Stats : conditional probability
+\newcommand\Pro[1]
+{
+	\mathbb{P}\left( #1 \right)
+}
+
+\newcommand\E[2][]
+{
+	\mathbb{E}_{#1}\left[ #2 \right]	
+}
+
+\newcommand\condp[2]
+{
+	p(#1 \, \vert \, #2)
+}
+
+\newcommand\Var[1]
+{
+	\mathbb{V}\text{ar}\left(#1\right)
+}
+
+\newcommand\normalDb[3]
+{
+	#1 \overset{d}{\sim} \mathcal{N}\left(#1\, \left\vert \, #2, #3\right.\right)
+}
+
+\newcommand\argmax[2]
+{
+	\underset{ #1 }{\operatorname{argmax}}\left\{ #2 \right\}
+}
+
+\newcommand\argmin[2]
+{
+	\underset{ #1 }{\operatorname{argmin}}\left\{ #2 \right\}
+}
+
+\newcommand\grad[2][]
+{
+	\nabla_{ #1 }{ #2}
+}
+
+\newcommand\eps
+{
+	\varepsilon
+}
