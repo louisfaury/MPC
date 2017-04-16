@@ -1,0 +1,129 @@
+%!TEX encoding = IsoLatin
+
+%% Document is article 
+\documentclass[a4paper]{article}
+
+%% ----------------------------------------------------- PACKAGES ----------------------------------------------------- %%
+\usepackage{coolArticle}
+\usepackage[ruled]{algorithm2e}
+\usepackage{verbatim}
+
+
+%% ---------------------------------------------------- DOCUMENT ---------------------------------------------------- %%
+\begin{document}
+
+	\noindent \textsc{Gallois-Montbrun} Grégoire\\
+	\textsc{Faury} Louis 
+		\titlebox{0.6}{Model Predictive Control}{Exercise \#4 - \textcolor{blue}{Group 2}}
+	
+	\section{Ex.1 : Implement MPC}
+	{
+		\paragraph{} We consider the following discrete-time linear time-invariant system : 
+		\begin{equation}
+			x^+ = \begin{bmatrix} 0.9752 & 1.4544 \\ -0.0327 & 0.9315 \end{bmatrix} + \begin{bmatrix} 0.0248 \\ 0.0327\end{bmatrix}u
+		\end{equation}
+		with constraints : 
+		\begin{equation}
+			\begin{aligned}
+				\mathbb{X} &= \{x\, \vert \, \vert x_1 \vert \leq 5, \, \vert x_2 \vert \leq 0.2 \}\\
+				\mathbb{U} &= \{ u\, \vert \, \vert u \vert \leq 1.75\}
+			\end{aligned}
+		\end{equation}
+		
+		\paragraph{} We are going to implement a MPC controller for this system with horizon $N=10$ and cost function : 
+		\begin{equation}
+			I(x,u) = 10 x^Tx + u^T u
+		\end{equation}
+		
+		\paragraph{} Let us first compute the terminal controller, terminal weight function and the terminal set that ensure recursive feasibility and stability of the closed loop system. Thanks to the last exercice session, their derivation is straight-forward : the terminal controller $K_{lqr}$ and the terminal weight function $V_{lqr}(x) = x^TPx$ are obtained thanks to the \texttt{dlqr($\cdot$)} Matlab function. The terminal set is therefore obtained by computing the maximum invariant set for the system : 
+		\begin{equation}
+			x^+ = (A+BK_{lqr})x
+		\end{equation}
+		
+		\paragraph{} The MPT library allows us to check that our computations are correct : 
+		{\small 
+		\begin{verbatim}
+			Boolean value for equality between sets (=1 if sets are equal) :
+   			1
+
+			MPT terminal state :
+   			37.0252   68.3850
+  			 68.3850  407.1177
+
+			Our terminal state :
+ 			  37.0252   68.3850
+  			 68.3850  407.1177
+
+			MPT terminal gain :
+  			 -1.6478  -11.8344
+
+			Our terminal gain :
+  			 -1.6478  -11.8344
+		\end{verbatim}
+		}
+		
+		\paragraph{} We now proceed on implementing the MPC algorithm. We'll use Matlab optimization function \texttt{quadprog} which solves the optimization program : 
+		\boxedeq{red}
+		{
+			\begin{aligned}
+				fval = &\min_z& \frac{1}{2}z^THz + h^Tz \\
+					  & \text{s.t } &Gz \leq g \\
+					  &		     &Tz = t
+			\end{aligned}
+		}
+		We therefore need to express our initial optimization program 
+		\begin{equation}
+			\begin{aligned}
+				&\min_u \sum_{i=0}^{N-1} \left\{  x_i^TQx_i + u_i^T Ru_i \right\}+x_N^TPx_N \\
+				& \text{ s.t }  \left\{
+					\begin{aligned}
+						&\forall i \in\{0,\hdots, N\}, \, x_{i+1} = Ax_i + Bu_i \\
+						&\forall i \in\{0,\hdots, N\}, \,  (x_i,u_i) \in \mathbb{X} \times\mathbb{U} \\
+						&x_N \in \mathcal{X}_f
+					\end{aligned}\right.
+			\end{aligned}
+		\end{equation}
+		as such, with $Q = 10\cdot I_2$, $R=1$. This leads to the following expressions : 
+		\begin{equation}
+		\left\lVert
+			\begin{aligned}
+				z &= \begin{pmatrix} x_{01}, x_{02}, \hdots x_{N2}, u_0, \hdots u_{N-1}\end{pmatrix}^T \in \mathbb{R}^{3N}\\[10pt]
+				H &= \begin{pmatrix}
+					Q &  0 & 0 & 0& 0 & 0 & 0\\
+					0 & \ddots & \ddots  & \ddots & \ddots &\ddots& \vdots \\
+					0 & \ddots & \ddots  & \ddots   \ddots & \ddots &\ddots& \vdots \\
+					0 & \ddots & \ddots  & Q & \ddots & \ddots & \vdots\\
+					0 & \ddots & \ddots & \ddots & R & \ddots& \vdots \\
+					0 & \ddots & \ddots & \ddots & \ddots & \ddots & 0 \\
+					0 & \hdots & \hdots & \hdots & \hdots & 0 & R
+				\end{pmatrix} \in\mathcal{M}_{3N,3N}(\mathbb{R}) \\[10pt]
+				h &= 0_{\mathbb{R}^{3N}} \\[10pt]
+				T &= \begin{pmatrix}
+						I_2  & 0 & \hdots & 0 & B & 0 & \hdots & 0 \\
+						-A & \ddots  & \ddots & \ddots & \ddots & \ddots & \ddots & \vdots \\
+						0 & \ddots & \ddots  & \ddots & \ddots & \ddots & \ddots & \vdots \\
+						0 & \hdots & -A & I_2  & 0 & \hdots & \hdots & B
+					\end{pmatrix} \in\mathcal{M}_{2N,3N}(\mathbb{R}) \\[10pt]
+				t &= \begin{pmatrix} Ax_0 & 0 & \hdots & 0 \end{pmatrix}^T \in\mathbb{R}^{2N} \\[10pt] \\
+				G &= \begin{pmatrix}
+					C &  0 & 0 & 0& 0 & 0 & 0\\
+					0 & \ddots & \ddots  & \ddots   \ddots & \ddots &\ddots& \vdots \\
+					0 & \ddots & C  & \ddots & \ddots & \ddots & \vdots\\
+					0 & \ddots & \ddots  & F & \ddots & \ddots & \vdots\\
+					0 & \ddots & \ddots & \ddots & D & \ddots& \vdots \\
+					0 & \ddots & \ddots & \ddots & \ddots & \ddots & 0 \\
+					0 & \hdots & \hdots & \hdots & \hdots & 0 & D
+				\end{pmatrix}\\[10pt]
+				g &= \begin{pmatrix} a & \hdots & a & f & d & \hdots & d \end{pmatrix}^T
+			\end{aligned}\right.
+		\end{equation}
+		where we took the following notations : 
+		\begin{equation}
+			\begin{aligned}
+				&\mathbb{X} = \{ x \, \vert \, Cx \leq c \} \\
+				&\mathbb{U} = \{ u \, \vert \, Du \leq u \}\\
+				&\mathcal{X}_f = \{ x \, \vert \, Fx \leq f \}
+			\end{aligned}
+		\end{equation}
+	}
+\end{document}

@@ -53,7 +53,7 @@ Vf = @(x) x'*P*x;           % terminal cost
  mpt_res.controller = sys.LQRGain;
  
  % display 
- disp('Boolean value for equality between sets :')
+ disp('Boolean value for equality between sets (=1 if sets are equal) :')
  disp(mpt_res.set==algo_res.set);
  disp('MPT terminal state :');
  disp(mpt_res.weight); 
