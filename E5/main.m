@@ -12,7 +12,8 @@ A = [ 0.7115 -0.4345;
       0.4345 0.8853];
 B = [0.2173 0.0573]';
 C = [0 1];
-
+mess = strcat('Rank O(A,C) =',{' '},num2str(rank([C;C*A])),{' '},': system is observable');
+disp(string(mess));
 % augmented state 
 f  = zeros(3,1);     % f_k = [x_k;d_k]
 Bd = zeros(size(B));
@@ -25,34 +26,34 @@ Cf = [C Cd];
 F = [0.5; 0.6; 0.7];
 L = (place(Af',-Cf',F))';
 
-% % simulate the system and the estimate's dynamics 
-% max_iter    = 30;
-% x           = [1;2].*ones(2,max_iter);          % state
-% d           = 0.2*ones(1,max_iter);             % disturbance
-% u           = 0;                                % constant zero control 
-% f           = [3; 0; 0].*ones(3,max_iter); % augmented state : [estimated state ; estimated disturbance]
-% y           = (C*x + d).*ones(1,max_iter);      % output 
-% for iter=1:max_iter
-%    f(:,iter+1) = Af*f(:,iter) + [B;0]*u + L*(Cf*f(:,iter)-y(:,iter));
-%    x(:,iter+1) = A*x(:,iter) + B*u;
-%    y(:,iter+1) = C*x(:,iter) + d(:,iter);
-% end
-% 
-% % plot
-% plot(x(1,:),x(2,:),'r','LineWidth',2); hold on,
-% plot(f(1,:),f(2,:),'b','LineWidth',2);
-% grid minor;
-% h = legend('True state $x$','Estimated State $\hat{x}$');
-% set(h,'interpreter','latex','FontSize',14)
-% xlabel('$x_1$','interpreter','latex','FontSize',14);
-% ylabel('$x_2$','interpreter','latex','FontSize',14);
-% figure;
-% stairs(d,'r','LineWidth',2); hold on;
-% stairs(f(3,:),'b','LineWidth',2);
-% h = legend('$d$','$\hat{d}$');
-% set(h,'interpreter','latex','FontSize',14);
-% xlabel('Time');
-% grid minor;
+% simulate the system and the estimate's dynamics 
+max_iter    = 30;
+x           = [1;2].*ones(2,max_iter);          % state
+d           = 0.2*ones(1,max_iter);             % disturbance
+u           = 0;                                % constant zero control 
+f           = [3; 0; 0].*ones(3,max_iter); % augmented state : [estimated state ; estimated disturbance]
+y           = (C*x + d).*ones(1,max_iter);      % output 
+for iter=1:max_iter
+   f(:,iter+1) = Af*f(:,iter) + [B;0]*u + L*(Cf*f(:,iter)-y(:,iter));
+   x(:,iter+1) = A*x(:,iter) + B*u;
+   y(:,iter+1) = C*x(:,iter) + d(:,iter);
+end
+
+% plot
+plot(x(1,:),x(2,:),'r','LineWidth',2); hold on,
+plot(f(1,:),f(2,:),'b','LineWidth',2);
+grid minor;
+h = legend('True state $x$','Estimated State $\hat{x}$');
+set(h,'interpreter','latex','FontSize',14)
+xlabel('$x_1$','interpreter','latex','FontSize',14);
+ylabel('$x_2$','interpreter','latex','FontSize',14);
+figure;
+stairs(d,'r','LineWidth',2); hold on;
+stairs(f(3,:),'b','LineWidth',2);
+h = legend('$d$','$\hat{d}$');
+set(h,'interpreter','latex','FontSize',14);
+xlabel('Time');
+grid minor;
 
 %% Exercice 2 
 % Minimizing u^2 and respecting constraints (YALMIP implementation)
