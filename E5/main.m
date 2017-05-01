@@ -69,7 +69,7 @@ grid minor;
 
 %% Exercice 3
 Q = ones(2);
-R = 1;
+R = 0.5;
 N = 5;
 P = dlyap(A,Q);
 Hu = [ 1; -1]; hu = [3;3];

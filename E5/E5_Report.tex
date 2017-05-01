@@ -11,11 +11,11 @@
 
 \noindent \textsc{Gallos-Montbrun} Grégoire\\
 \textsc{Faury} Louis 
-	\titlebox{0.6}{Model Predictive Control}{Exercice \#5 - \textcolor{blue}{Group 2}}
+	\titlebox{0.6}{Model Predictive Control}{Exercise \#5 - \textcolor{blue}{Group 2}}
 	
 	\vspace{10pt}
 	\paragraph{} We consider the following system : 
-	\begin{equation}
+	\begin{equation}\label{eq::system}
 		\begin{aligned}
 			x^+ &= Ax + Bu \\
 			y_k &= Cx +d
@@ -30,7 +30,7 @@
 		-3 \leq u \leq 3
 	\end{equation}
 	
-	\section{Exercice 1}
+	\section{Exercise 1}
 	{
 		\paragraph{} Let us define $\hat{x}_k$ to be the current state of an estimator of the state $x$, with dynamic : 
 		\begin{equation}
@@ -62,4 +62,85 @@
 		\end{equation}
 		
 	}
+    
+    \section{Exercise 2}
+	{
+		\paragraph{} 
+        In this exercise, we consider that at instant $k$ we dispose from an estimate $\hat{x}_k$ for the current state as well as an estimate $\hat{d}_k$ for the disturbance. We intend to compute $u_s$, the steady state input that minimizes $u^2$ while allowing the output $y$ to follow the reference $r$ and respecting input constraints.
+        
+        \paragraph{}
+        At steady state, equation (\ref{eq::system}) writes:
+        \begin{equation}
+		\begin{aligned}
+			x_s &= Ax_s + Bu_s \\
+			r &= Cx_s +d
+		\end{aligned}
+		\end{equation}
+        which is equivalent to:
+        \begin{equation}
+		\begin{bmatrix}
+			I-A & -B\\
+			C & 0
+        \end{bmatrix}
+        \begin{bmatrix}
+			x_s\\
+			u_s
+        \end{bmatrix}
+        =	\begin{bmatrix}
+			0\\
+			r-C_d d
+        \end{bmatrix}
+		\end{equation}
+        
+        \paragraph{}
+        However, actual disturbance $d$ is unknown, we therefore use $\hat{d}_k$ to approach it with the following minimization problem:
+        
+        \begin{equation}
+        		\begin{aligned}
+				&\quad \quad \quad \quad \quad \quad \quad \min_{u_s, x_s} u_s^2\\
+				&\text{ s.t }  \left\{
+					\begin{aligned}
+						& \begin{bmatrix} I-A & -B\\ C & 0 \end{bmatrix} \begin{bmatrix} x_s\\ u_s\end{bmatrix} =	\begin{bmatrix} 0\\ r-C_d \hat{d}_k\end{bmatrix}\\
+                       	& -3 \leq u_s \leq 3
+					\end{aligned}\right.
+			\end{aligned}
+        \end{equation}
+        
+      \paragraph{}
+      We solve this minimization problem using YALMIP quadratic programming methods on Matlab.	
+	}
+    
+     \section{Exercise 3}
+	{
+		\paragraph{}
+        In this exercise we design an MPC controller for reference tracking for the disturbed system. We use stage costs $Q=I$ and $R=1$ The terminal set is easy to compute: since there is no constraint on the state of the system, and since the system is stable, $\chi_f = \mathbb{R}^2$ is a convenient terminal set. Corresponding terminal cost is: 
+        \begin{equation}
+        V_f(x_N) = (x_N - x_s)^TP((x_N - x_s)), \textrm{ with } P - A^TPA = Q.
+        \end{equation}
+        
+        \paragraph{}
+        the resulting minimization problem solved at each time step is therefore:
+        \begin{equation}
+        \begin{aligned}
+			&\min_{\Delta u_i, \Delta x_i} \sum_{i=0}^{N-1} \Delta x_i^TQ \Delta x_i + \Delta u_i^TR \Delta u_i + \Delta x_N^TP \Delta x_N\\
+				& \text{ s.t }  \left\{
+					\begin{aligned}
+                    	& \Delta x_0 = \Delta \hat{x}\\
+                        & \forall i \in\{0,\hdots, N-1\} \Delta x_{i+1} = A\Delta x_i + B \Delta u_i \\
+						&\forall i \in\{0,\hdots, N-1\}, \, -3+u_s \leq \Delta u_i \leq 3+u_s\\
+						& \Delta x_N \in \mathbb{R}^2         
+					\end{aligned}\right.
+		\end{aligned}
+        \end{equation}
+        
+        where $\Delta x_i = (x_i - x_s)$, and $\Delta u_i = (u_i - u_s)$ with $u_s$ and $x_s$ computed at each time step according to exercise 2.
+        
+        \paragraph{}
+        Figures (\ref{fig::xtraj_0.5}), (\ref{fig::u_0.5}) and (\ref{fig::y_0.5}) display the result of the closed loop MPC simulation with $r=0.5$ and $N=5$ as horizon. We clearly see that output $y$ converges to the reference and that control $u$ always satisfy the constraints. Moreover, as in exercise 1, state estimate converges to the actual state.
+        
+        \paragraph{}
+         Figures (\ref{fig::xtraj_1}), (\ref{fig::u_1}) and (\ref{fig::y_1}) show similar result with $r=1$.
+	}
+   
+   
 \end{document}
