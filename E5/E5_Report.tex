@@ -137,9 +137,45 @@
         
         \paragraph{}
         Figures (\ref{fig::xtraj_0.5}), (\ref{fig::u_0.5}) and (\ref{fig::y_0.5}) display the result of the closed loop MPC simulation with $r=0.5$ and $N=5$ as horizon. We clearly see that output $y$ converges to the reference and that control $u$ always satisfy the constraints. Moreover, as in exercise 1, state estimate converges to the actual state.
+        \begin{figure}[h!]
+        		\begin{minipage}{0.33\linewidth}
+			\includegraphics[width=\linewidth]{xtraj_05}
+			\caption{Trajectory estimation, $r=0.5$}
+			\label{fig::xtraj_0.5}
+		\end{minipage}
+		\begin{minipage}{0.33\linewidth}
+			\includegraphics[width=\linewidth]{u_05}
+			\caption{Inputs, $r=0.5$}
+			\label{fig::u_0.5}
+		\end{minipage}
+		\begin{minipage}{0.33\linewidth}
+			\includegraphics[width=\linewidth]{y_05}
+			\caption{Output estimation, $r=0.5$}
+			\label{fig::y_0.5}
+		\end{minipage}
+        \end{figure}
         
         \paragraph{}
          Figures (\ref{fig::xtraj_1}), (\ref{fig::u_1}) and (\ref{fig::y_1}) show similar result with $r=1$.
+         
+          \begin{figure}[h!]
+        		\begin{minipage}{0.33\linewidth}
+			\includegraphics[width=\linewidth]{xtraj_1}
+			\caption{Trajectory estimation, $r=1$}
+			\label{fig::xtraj_1}
+		\end{minipage}
+		\begin{minipage}{0.33\linewidth}
+			\includegraphics[width=\linewidth]{u_1}
+			\caption{Inputs, $r=1$}
+			\label{fig::u_1}
+		\end{minipage}
+		\begin{minipage}{0.33\linewidth}
+			\includegraphics[width=\linewidth]{y_1}
+			\caption{Output estimation, $r=1$}
+			\label{fig::y_1}
+		\end{minipage}
+        \end{figure}
+        
 	}
    
    
