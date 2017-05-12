@@ -17,7 +17,7 @@ Ts = ssM.timestep;
 % Parameters of the Storage Model
 a = ssModel.A;
 b = ssModel.Bu;   
-c = 0.2*ones(3,1); % $/kWh (power cost)
+
 % Installation Test
 yalmip('version')
 sprintf('The Project files are successfully installed')
@@ -38,7 +38,7 @@ dist   = zeros(3,1);
 
 %% Controller Design (Setting-up MPC optimizer)
 % define horizon 
-N = 2;
+N = 5;
 % defines sdpvars
 x = sdpvar(10*ones(1,N),ones(1,N));
 u = sdpvar(3*ones(1,N-1),ones(1,N-1));
@@ -53,13 +53,13 @@ constraints = [];
 objective   = 0;
 options = sdpsettings('verbose',1,'solver','gurobi');   % Use Gurobi solver
 for i=2:N
-    constraints = [constraints, x{i} == A*x{i-1}+ Bu*u + Bd*d{i-1}];
+    constraints = [constraints, x{i} == A*x{i-1}+ Bu*u{i-1} + Bd*d{i-1}];
     constraints = [constraints, y{i} == C*x{i}];
     constraints = [constraints, Hy*y{i} <= hy];
-    constraints = [constraints, Hu*u <= hu];
+    constraints = [constraints, Hu*u{i-1} <= hu];
     objective   = objective + (y{i}-yRef(1,:))'*R*(y{i}-yRef(1,:));
 end
-controller = optimizer(constraints,objective,options,{x{1},[d{:}]},u);
+controller = optimizer(constraints,objective,options,{x{1},[d{:}]},[u{:}]);
 
 %% Section 1: tracking MPC
 
@@ -72,14 +72,35 @@ controller = optimizer(constraints,objective,options,{x{1},[d{:}]},u);
 % start report 
 
 %% Section 2: economic MPC and soft constraints
-% change cost function 
-objective = 0; 
-for i=1:N-1
-    objective = objective + c'*u;
-end
-controller = optimizer(constraints,objective,options,{x{1},[d{:}]},u);
 
-simBuild(controller,200,@shiftPred,N,1);
+% define horizon 
+N = 30;
+% defines sdpvars
+x   = sdpvar(10*ones(1,N),ones(1,N));
+u   = sdpvar(3*ones(1,N-1),ones(1,N-1));
+y   = sdpvar(3*ones(1,N),ones(1,N));
+d   = sdpvar(3*ones(1,N),ones(1,N));
+eps = sdpvar(6*ones(1,N), ones(1,N)); % soft constraints 
+
+% define constraints over horizon as well as objective function 
+c       = 0.2*ones(3,1); % $/kWh (power cost)
+R_eps   = 1*eye(6,6);      % soft constraints penalty
+
+constraints = [];  
+objective   = 0;
+options = sdpsettings('verbose',1,'solver','gurobi');   % Use Gurobi solver
+for i=2:N
+    constraints = [constraints, x{i} == A*x{i-1}+ Bu*u{i-1} + Bd*d{i-1}];
+    constraints = [constraints, y{i} == C*x{i}];
+    constraints = [constraints, Hy*y{i} <= hy + eps{i}];
+    constraints = [constraints, eps{i} >= zeros(6,1)];
+    constraints = [constraints, Hu*u{i-1} <= hu];
+    objective = objective + c'*u{i-1} + eps{i}'*R_eps*eps{i};
+end
+controller = optimizer(constraints,objective,options,{x{1},[d{:}]},[u{:}]);
+
+simBuild(controller,500,@shiftPred,N,1);
+
 
 %% Section 3: economic, soft constraints, and variable cost
 
