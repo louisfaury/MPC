@@ -17,7 +17,7 @@ Ts = ssM.timestep;
 % Parameters of the Storage Model
 a = ssModel.A;
 b = ssModel.Bu;   
-
+c = 0.2*ones(3,1); % $/kWh (power cost)
 % Installation Test
 yalmip('version')
 sprintf('The Project files are successfully installed')
@@ -38,7 +38,7 @@ dist   = zeros(3,1);
 
 %% Controller Design (Setting-up MPC optimizer)
 % define horizon 
-N = 5;
+N = 2;
 % defines sdpvars
 x = sdpvar(10*ones(1,N),ones(1,N));
 u = sdpvar(3*ones(1,N-1),ones(1,N-1));
@@ -53,16 +53,17 @@ constraints = [];
 objective   = 0;
 options = sdpsettings('verbose',1,'solver','gurobi');   % Use Gurobi solver
 for i=2:N
-    constraints = [constraints, x{i} == A*x{i-1}+ Bu*u{i-1} + Bd*d{i-1}];
+    constraints = [constraints, x{i} == A*x{i-1}+ Bu*u + Bd*d{i-1}];
     constraints = [constraints, y{i} == C*x{i}];
     constraints = [constraints, Hy*y{i} <= hy];
-    constraints = [constraints, Hu*u{i-1} <= hu];
+    constraints = [constraints, Hu*u <= hu];
     objective   = objective + (y{i}-yRef(1,:))'*R*(y{i}-yRef(1,:));
 end
-controller = optimizer(constraints,objective,options,{x{1},[d{:}]},[u{:}]);
-simBuild(controller,500,@shiftPred,N,1);
+controller = optimizer(constraints,objective,options,{x{1},[d{:}]},u);
 
-% simBuild 
+%% Section 1: tracking MPC
+
+% simBuild(controller,500,@shiftPred,N,1);
 
 % nice plots 
 
@@ -70,13 +71,15 @@ simBuild(controller,500,@shiftPred,N,1);
 
 % start report 
 
-%% Section 1: tracking MPC
-
-%fill in here
-
 %% Section 2: economic MPC and soft constraints
+% change cost function 
+objective = 0; 
+for i=1:N-1
+    objective = objective + c'*u;
+end
+controller = optimizer(constraints,objective,options,{x{1},[d{:}]},u);
 
-%fill in here
+simBuild(controller,200,@shiftPred,N,1);
 
 %% Section 3: economic, soft constraints, and variable cost
 
