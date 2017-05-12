@@ -1,0 +1,57 @@
+%!TEX encoding = IsoLatin
+
+%% Document is article 
+\documentclass[a4paper]{article}
+
+%% ----------------------------------------------------- PACKAGES ----------------------------------------------------- %%
+\usepackage{coolArticle}
+
+%% ---------------------------------------------------- DOCUMENT ---------------------------------------------------- %%
+\begin{document}
+
+\noindent \textsc{Gallos-Montbrun} Grégoire\\
+\textsc{Faury} Louis 
+\vspace{15pt}
+
+	\titlebox{0.6}{\Large Model Predictive Control}{\Large \textbf{\textcolor{blue}{Building Temperature Regulation}}}
+	
+	\section{Introduction}
+	{
+		\paragraph{} This project aims at controlling the temperature inside a 3 room building. The full state and output dynamics are given by : 
+		\begin{equation}
+			\begin{aligned}
+				x^+ &= Ax + B_uu + B_dd\\
+				y &= Cx
+			\end{aligned}
+		\end{equation}
+		where : 
+		\begin{equation}
+		\left\{
+			\begin{aligned}
+				&x \in \mathbb{R}^{10} & &\text{ has no significant physical meaning} \\
+				&u \in\mathbb{R}^3 & &\text{ is the electrical power dedicated to the heating of each room}\\
+				&d \in\mathbb{R}^3 & &\text{ is the disturbance input (temperature, solar gain and internal gains)} \\
+				&y\in\mathbb{R}^3 & & \text{ is the temperature in each room of the building}
+			\end{aligned}\right.
+		\end{equation}
+		
+		\paragraph{} The disturbance will be considered as an input, since we have its prediction over a period of 8 days. Figure (\ref{fig::temp_pred}) and (\ref{fig::gain_pred}) provide a plot of those predictive value. We can namely notice that we observe a \emph{diurne periodicity} (periodicity over 24h of the different signals). 
+		
+		\begin{figure}[h!]
+			\begin{minipage}{0.45\linewidth}
+				\includegraphics[width=\linewidth]{temp_pred}
+				\caption{External temperature predictions}
+				\label{fig::temp_pred}
+			\end{minipage}
+			\begin{minipage}{0.45\linewidth}
+				\includegraphics[width=\linewidth]{gains_pred}
+				\caption{Solar and internal gain predictions}
+				\label{fig::gain_pred}
+			\end{minipage}
+		\end{figure}
+		
+		\paragraph{} The following sections implements different versions of model predictive controllers, considering different objectives : target tracking, cost minimization, storage cost, .. 
+	}
+	
+   
+\end{document}
