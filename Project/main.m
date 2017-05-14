@@ -40,11 +40,10 @@ x = sdpvar(10*ones(1,N),ones(1,N));
 u = sdpvar(3*ones(1,N-1),ones(1,N-1));
 y = sdpvar(3*ones(1,N),ones(1,N));
 d = sdpvar(3*ones(1,N),ones(1,N));
-
 % Defines constraints over horizon as well as objective function : 
 % objective(y,yredf) = sum_i ((y_i-yref(i))'*R*(y_i-yref(i))
 % ( no terminal weight nor terminal set ) 
-R = eye(3);
+R = 10*eye(3);
 constraints = [];  
 objective   = 0;
 options = sdpsettings('verbose',0,'solver','gurobi');   % Use Gurobi solver
@@ -71,17 +70,15 @@ con = plot(t,22*ones(size(t)),'-.','LineWidth',1.2,'Color','k');
 plot(t,26*ones(size(t)),'-.','LineWidth',1.2,'Color','k');
 legend([t1,t2,t3,ref,con],{'Room 1 temperature','Room 2 temperature','Room 3 temperature','Target temperature','Temperature hard constraints'});
 title('Output tracking - building room temperature');
-xlabel('Time steps');
-ylabel('Temperature (C)');
+xlabel('Time steps'); ylabel('Temperature (C)');
 figure; hold on;
 u1  = stairs(t,ut(1,:),'LineWidth',1.5,'Color','b');
 u2  = stairs(t,ut(2,:),'LineWidth',1.5,'Color','r');
 u3  = stairs(t,ut(3,:),'LineWidth',1.5,'Color','g');
 con = plot(t,zeros(size(t)),'-.','LineWidth',1.5,'Color','k');
 plot(t,15*ones(size(t)),'-.','LineWidth',1.5,'Color','k');
-xlabel('Time step');
-ylabel('Power Input (kW');
-legend([u1,u2,u3,con],{'Input Room 1','Input Room 1','Input Room 1','Inputs constraints'});
+xlabel('Time step'); ylabel('Power Input (kW');
+legend([u1,u2,u3,con],{'Input Room 1','Input Room 2','Input Room 3','Inputs constraints'});
 title('MPC Control Inputs');
 
 
