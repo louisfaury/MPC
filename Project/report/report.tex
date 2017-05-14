@@ -97,7 +97,8 @@
 				\label{fig::naivempc_N20_output}
 			\end{center}
 		\end{figure}
-		Because the controller is now able to consider the temperature raise due to the orientation of the room and the sun exposition, it allows a small undershoot by setting the corresponding input to 0 well before this event. Therefore, a smaller undershoot is achieved when increasing the horizon. 
+		
+		\paragraph{} Because the controller is now able to consider the temperature raise due to the orientation of the room and the sun exposition, it allows a small undershoot by setting the corresponding input to 0 well before this event. Therefore, a smaller undershoot is achieved when increasing the horizon. 
 	}
    
    	\section{Economic MPC}
@@ -107,19 +108,30 @@
 		\begin{equation}
 			J = C^T\left(\sum_{n=1}^N u_n\right)
 		\end{equation}
-		where $C=\begin{pmatrix} c & c & c\end{pmatrix}^T$ is a cost matrix, with $c=0.2$ \$/kWh. However, this linear cost function might break some stability and recursive feasibility, which leads us to prefer a soft constraint formulation. 
+		where $C=\begin{pmatrix} c & c & c\end{pmatrix}^T$ is a cost matrix, with $c=0.2$ \$/kWh. However, because this linear cost function might break some stability and recursive feasibility properties,a soft constraint formulation should be prefered. 
 	}
 	
 	\section{Soft Constraints}
 	{
-		\paragraph{} We decided to implement \emph{both} $L_2$ and $L_1$ penalization, in order to find a tradeoff between the amplitude of constraints violation and their duration. The actual optimization program we therefore solve writes : 
+		\paragraph{} We hereinafter describe the soft constraints implementation of our controller and the obtained results. We decided to implement \emph{both} $L_2$ and $L_1$ penalization for the slack variables, in order to find a tradeoff between the amplitude of constraints violation and their duration. The actual optimization program we therefore solve writes : 
 		\begin{mini}|s|[2]
-  			{}{\sum_{n=1}^N\left[C^Tu_i +  \lVert \eps_n\rVert_2 +\lVert \eps_n\rVert_1 \right]}
+  			{}{\sum_{n=1}^N\left[C^Tu_n +  r_1(\lVert \eps_n\rVert_2 +\lVert \eps_n\rVert_1) +  r_2(\lVert \hat{\eps}_n\rVert_2 +\lVert \hat{\eps}_n\rVert_1) \right]}
   				 {\label{eq::svr}}{}
-				 \addConstraint{y_n \geq 22}{\quad & &n\in\{1,\hdots,N\}}
-				 \addConstraint{y_n \leq 26}{\quad & &n\in\{1,\hdots,N\}}
+				 \addConstraint{y_n \geq 22 - \hat{\eps}_n}{\quad & &n\in\{1,\hdots,N\}}
+				 \addConstraint{y_n \leq 26+\eps_n}{\quad & &n\in\{1,\hdots,N\}}
 				 \addConstraint{u_n \leq 15}{\quad & &n\in\{1,\hdots,N\}}
 				 \addConstraint{u_n \geq 0}{\quad & &n\in\{1,\hdots,N\}}
+				 \addConstraint{u_n \geq 0}{\quad & &n\in\{1,\hdots,N\}}
+				 \addConstraint{\eps_n\geq 0}{\quad & &n\in\{1,\hdots,N\}}
+				 \addConstraint{\hat{\eps}_n\geq 0}{\quad & &n\in\{1,\hdots,N\}}				 
 		\end{mini}
+		
+		\paragraph{} Figures (\ref{}) and (\ref{}) display the results obtained with this controller, given an horizon size $N=20$. 
+		\newline One can notice that if (for this example), recursive stability and feasibility seem to be achieved. We also notice that, as one can expect, the retained solution's output stays near its lower bound, since this one corresponds to a lower cost. 
+	}
+	
+	\section{Night Setback}
+	{
+	
 	}
 \end{document}
