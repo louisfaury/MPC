@@ -54,12 +54,13 @@ xbt = zeros(1,T);
 vt = zeros(1,T);
 
 cpt = zeros(1,T);
-sbt = zeros(1,T);
+sbMax = zeros(1,T);
+sbMin = zeros(1,T);
 
 
 for i = 1:T
 [d_pred, cp, sb] = fhandle(i, N);
-[U, id] = controller{[x; xb; d_pred(:); cp(:); sb(:)]}; % this is the suggested form for the controller : you can change it provided buildSim.m is also accordingly changed
+[U, id] = controller{x, xb, d_pred, cp, repmat(sb, 3, 1)}; % this is the suggested form for the controller : you can change it provided buildSim.m is also accordingly changed
 
 xt(:,i) = x;
 ut(:,i) = U(1:nu,1);
@@ -68,7 +69,8 @@ vt(:,i) = U(end-1,1);
 xbt(:,i) = xb;
 
 cpt(:,i) = cp(1,1);
-sbt(:,i) = sb(1,1);
+sbMax(:,i) = sb(1,1);
+sbMin(:,i) = -sb(2,1);
 
 yt(:,i) = C*x;
 t(1,i) = i;
@@ -114,8 +116,8 @@ ylabel('Temperature - Zone2 (C)');
 % subplot(2,3,3)
 plot(t, yt(3,:),'c')
 hold on
-plot(t, 26+sbt(1,:),'r')
-plot(t, 22-sbt(1,:),'r')
+plot(t, sbMax(1,:),'r')
+plot(t, sbMin(1,:),'r')
 % legend('Zone-3 Temperature', 'Temperature Constraints')
 legend('Zone-1','Zone-2','Zone-3', 'Temperature Constraints')
 xlabel('Hours');

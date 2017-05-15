@@ -1,17 +1,26 @@
 clc;
 close all;
 yalmip('clear')
-clear all
+clear;
 
 %% Model data
 load building.mat;
 load battery.mat;
 % Parameters of the Building Model
+<<<<<<< HEAD
+A   = ssM.A;
+Bu  = ssM.Bu;
+Bd  = ssM.Bd;
+C   = ssM.C;
+Ts  = ssM.timestep;
+
+=======
 A = ssM.A;
 Bu = ssM.Bu;
 Bd = ssM.Bd;
 C = ssM.C;
 Ts = ssM.timestep;
+>>>>>>> 513603abdad1ebe884dffb5ae0d0fefda5c06d49
 % Parameters of the Storage Model
 a = ssModel.A;
 b = ssModel.Bu;   
@@ -24,6 +33,10 @@ sprintf('The Project files are successfully installed')
 Hu = kron(eye(3),[1;-1]); hu = repmat([15 0]',3,1);
 % Hy?y <= huy
 Hy = kron(eye(3),[1;-1]); hy = repmat([26 -22]',3,1);
+% Hxb*y <= hxb
+Hxb = [1, -1]'; hxb = [20 0]';
+% Hv*v  <= hv
+Hv = [1, -1]'; hv = [20 20]';
 % reference 
 yRef = 24*ones(3,1);
 % arrays
@@ -57,6 +70,9 @@ end
 controller = optimizer(constraints,objective,options,{x{1},[d{:}]},[u{:}]);
 
 
+<<<<<<< HEAD
+% simBuild(controller,500,@shiftPred,N,1);
+=======
 %% Section 1: tracking MPC
 % Runs simulation 
 [~,yt,ut,t] = simBuild(controller,576-N,@shiftPred,N,1);
@@ -81,11 +97,12 @@ xlabel('Time step'); ylabel('Power Input (kW');
 legend([u1,u2,u3,con],{'Input Room 1','Input Room 2','Input Room 3','Inputs constraints'});
 title('MPC Control Inputs');
 
+>>>>>>> 513603abdad1ebe884dffb5ae0d0fefda5c06d49
 
 %% Section 2: economic MPC and soft constraints
 
 % define horizon 
-N = 30;
+N = 20;
 % defines sdpvars
 x   = sdpvar(10*ones(1,N),ones(1,N));
 u   = sdpvar(3*ones(1,N-1),ones(1,N-1));
@@ -95,7 +112,7 @@ eps = sdpvar(6*ones(1,N), ones(1,N)); % soft constraints
 
 % define constraints over horizon as well as objective function 
 c       = 0.2*ones(3,1); % $/kWh (power cost)
-R_eps   = 1*eye(6,6);      % soft constraints penalty
+R_eps   = 0.2*eye(6,6);    % soft constraints penalty
 
 constraints = [];  
 objective   = 0;
@@ -110,17 +127,104 @@ for i=2:N
 end
 controller = optimizer(constraints,objective,options,{x{1},[d{:}]},[u{:}]);
 
-simBuild(controller,500,@shiftPred,N,1);
+%simBuild(controller,200,@shiftPred,N,1);
 
 
 %% Section 3: economic, soft constraints, and variable cost
+% define horizon 
+N = 50;
+% defines sdpvars
+x   = sdpvar(10*ones(1,N),ones(1,N));
+u   = sdpvar(3*ones(1,N-1),ones(1,N-1));
+y   = sdpvar(3*ones(1,N),ones(1,N));
+d   = sdpvar(3*ones(1,N),ones(1,N));
+eps = sdpvar(6*ones(1,N), ones(1,N));       % soft constraints 
+cp  = sdpvar(3*ones(1,N-1),ones(1,N-1));    % variable cost
 
-%fill in here
+% define constraints over horizon as well as objective function 
+R_eps   = 10*eye(6,6);      % soft constraints penalty
+
+constraints = [];  
+objective   = 0;
+options = sdpsettings('verbose',1,'solver','+gurobi');   % Use Gurobi solver
+for i=2:N
+    constraints = [constraints, x{i} == A*x{i-1}+ Bu*u{i-1} + Bd*d{i-1}];
+    constraints = [constraints, y{i} == C*x{i}];
+    constraints = [constraints, Hy*y{i} <= hy + eps{i}];
+    constraints = [constraints, eps{i} >= zeros(6,1)];
+    constraints = [constraints, Hu*u{i-1} <= hu];
+    objective = objective + cp{i-1}'*u{i-1} + eps{i}'*R_eps*eps{i};
+end
+controller = optimizer(constraints,objective,options,{x{1},[d{:}], [cp{:}]},[u{:}]);
+
+%simBuild(controller,200,@shiftPred,N,2);
+
 
 %% Section 4 : Night setbacks
+% define horizon 
+N = 50;
+% defines sdpvars
+x   = sdpvar(10*ones(1,N),ones(1,N));
+u   = sdpvar(3*ones(1,N-1),ones(1,N-1));
+y   = sdpvar(3*ones(1,N),ones(1,N));
+d   = sdpvar(3*ones(1,N),ones(1,N));
+eps = sdpvar(6*ones(1,N), ones(1,N));       % soft constraints 
+cp  = sdpvar(3*ones(1,N-1),ones(1,N-1));    % variable cost
+sb  = sdpvar(6*ones(1,N), ones(1,N));       % night setbacks
 
-%fill in here
+% define constraints over horizon as well as objective function 
+R_eps   = 1*eye(6,6);      % soft constraints penalty
+
+constraints = [];  
+objective   = 0;
+options = sdpsettings('verbose',1,'solver','+gurobi');   % Use Gurobi solver
+for i=2:N
+    constraints = [constraints, x{i} == A*x{i-1}+ Bu*u{i-1} + Bd*d{i-1}];
+    constraints = [constraints, y{i} == C*x{i}];
+    constraints = [constraints, Hy*y{i} <= sb{i} + eps{i}];
+    constraints = [constraints, eps{i} >= zeros(6,1)];
+    constraints = [constraints, Hu*u{i-1} <= hu];
+    objective = objective + cp{i-1}'*u{i-1} + eps{i}'*R_eps*eps{i};
+end
+controller = optimizer(constraints,objective,options,{x{1},[d{:}], [cp{:}], [sb{:}]},[u{:}]);
+
+%simBuild(controller,200,@shiftPred,N,3);
 
 %% Section 5 : Battery coupled with the building
+% define horizon 
+N = 50;
+% defines sdpvars
+x       = sdpvar(10*ones(1,N),ones(1,N));
+u       = sdpvar(3*ones(1,N-1),ones(1,N-1));
+y       = sdpvar(3*ones(1,N),ones(1,N));
+d       = sdpvar(3*ones(1,N),ones(1,N));
+eps     = sdpvar(6*ones(1,N), ones(1,N));       % soft constraints 
+cp      = sdpvar(ones(1,N-1),ones(1,N-1));      % variable cost for e_k this time
+sb      = sdpvar(6*ones(1,N), ones(1,N));       % night setbacks
+xb      = sdpvar(ones(1,N), ones(1,N));         % battery storage
+e       = sdpvar(ones(1,N-1), ones(1,N-1));     % energy got from the grid
+v       = sdpvar(ones(1,N-1), ones(1,N-1));
 
-%fill in here
+% define constraints over horizon as well as objective function 
+R_eps   = 1*eye(6,6);      % soft constraints penalty
+
+constraints = [];  
+objective   = 0;
+options = sdpsettings('verbose',1,'solver','+gurobi');   % Use Gurobi solver
+for i=2:N
+    constraints = [constraints, x{i} == A*x{i-1}+ Bu*u{i-1} + Bd*d{i-1}];
+    constraints = [constraints, y{i} == C*x{i}];
+    constraints = [constraints, Hy*y{i} <= sb{i} + eps{i}];
+    constraints = [constraints, eps{i} >= zeros(6,1)];
+    constraints = [constraints, Hu*u{i-1} <= hu];
+    constraints = [constraints, e{i-1} >= 0];
+    constraints = [constraints, v{i-1} == e{i-1} - ones(1,3)*u{i-1}];
+    constraints = [constraints, xb{i} == a*xb{i-1} + b*v{i-1}];
+    constraints = [constraints, Hxb*xb{i} <= hxb];
+    constraints = [constraints, Hv*v{i-1} <= hv];
+    
+    objective = objective + cp{i-1}*e{i-1} + eps{i}'*R_eps*eps{i};
+end
+controller = optimizer(constraints,objective,options,{x{1}, xb{1}, [d{:}], [cp{:}], [sb{:}]},{[u{:}; v{:}; e{:}]});
+
+simBuildStorage(controller, 200, @shiftPred, N)

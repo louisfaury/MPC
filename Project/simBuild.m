@@ -46,7 +46,8 @@ xt = zeros(nx,T);   % T is the length of simulation in samples
 yt = zeros(ny,T);
 ut = zeros(nu,T);
 t = zeros(1,T);
-sbt = zeros(1,T);
+sbMax = zeros(1,T);
+sbMin = zeros(1,T);
 cpt = zeros(1,T);
 
 %% Simulating the system and the controller
@@ -56,12 +57,13 @@ if option == 1          % No night-setbacks and no variable cost (example)
 [U, id] = controller{x,d_pred};
 
 elseif option == 2      % Variable cost, but no night-setbacks
-[U, id] = controller{[x; d_pred(:); cp(:)]};            % this is the suggested form for the controller : you can change it provided buildSim.m is also accordingly changed
+[U, id] = controller{x, d_pred, repmat(cp, 3, 1)};           % this is the suggested form for the controller : you can change it provided buildSim.m is also accordingly changed
     cpt(:,i) = cp(1,1);
 elseif option == 3      % Variable cost and night-setbacks
-[U, id] = controller{[x; d_pred(:); cp(:); sb(:)]};     % this is the suggested form for the controller : you can change it provided buildSim.m is also accordingly changed
+[U, id] = controller{x, d_pred, repmat(cp, 3, 1), repmat(sb, 3, 1)};     % this is the suggested form for the controller : you can change it provided buildSim.m is also accordingly changed
     cpt(:,i) = cp(1,1);
-    sbt(:,i) = sb(1,1);
+    sbMax(1,i) = sb(1,1);
+    sbMin(1,i) = -sb(2,1);
 end
 
 xt(:,i) = x;
@@ -126,6 +128,38 @@ end
 % 
 % 
 % figure
+<<<<<<< HEAD
+% subplot(2,3,3)
+plot(t, yt(3,:), 'c')
+if option == 3
+    hold on
+    plot(t, sbMax(1,:),'r')
+    plot(t, sbMin(1,:),'r')
+    legend('Zone-1','Zone-2','Zone-3', 'Temperature Constraints')
+else
+    legend('Zone-1','Zone-2','Zone-3')
+end
+xlabel('Hours');
+ylabel('Temperature (C)');
+
+
+figure
+% subplot(2,3,4)
+plot(t,ut(1,:))
+hold on
+% if option == 2 || option == 3
+%     hold on
+%     plot(t,10*cpt(1,:),'r')
+%     legend('Zone-1 Input', 'High/Low Price Time')
+% end
+xlabel('Hours');
+ylabel('Power Input (kW)');
+
+
+% figure
+% subplot(2,3,5)
+plot(t,ut(2,:),'k')
+=======
 % % subplot(2,3,4)
 % plot(t,ut(1,:))
 % hold on
@@ -153,6 +187,7 @@ end
 % % figure
 % % subplot(2,3,6)
 % plot(t,ut(3,:),'c')
+>>>>>>> 513603abdad1ebe884dffb5ae0d0fefda5c06d49
 % if option == 2 || option == 3
 %     hold on
 %     plot(t,10*cpt(1,:),'r')
