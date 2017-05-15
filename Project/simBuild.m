@@ -18,7 +18,7 @@
 
 
 
-function [ xt, yt, ut, t ] = simBuild( controller, T, fhandle, N, option)
+function [ xt, yt, ut, cpt, t ] = simBuild( controller, T, fhandle, N, option)
 
 load building.mat;
 load battery.mat;
@@ -81,7 +81,7 @@ end
 
 
 %% Generating the Plots
-% 
+
 % % Converting time scale from time-step to hours
 % t = t./3;
 % 
@@ -128,46 +128,14 @@ end
 % 
 % 
 % figure
-<<<<<<< HEAD
-% subplot(2,3,3)
-plot(t, yt(3,:), 'c')
-if option == 3
-    hold on
-    plot(t, sbMax(1,:),'r')
-    plot(t, sbMin(1,:),'r')
-    legend('Zone-1','Zone-2','Zone-3', 'Temperature Constraints')
-else
-    legend('Zone-1','Zone-2','Zone-3')
-end
-xlabel('Hours');
-ylabel('Temperature (C)');
-
-
-figure
-% subplot(2,3,4)
-plot(t,ut(1,:))
-hold on
+% % subplot(2,3,4)
+% plot(t,ut(1,:))
+% hold on
 % if option == 2 || option == 3
 %     hold on
 %     plot(t,10*cpt(1,:),'r')
 %     legend('Zone-1 Input', 'High/Low Price Time')
 % end
-xlabel('Hours');
-ylabel('Power Input (kW)');
-
-
-% figure
-% subplot(2,3,5)
-plot(t,ut(2,:),'k')
-=======
-% % subplot(2,3,4)
-% plot(t,ut(1,:))
-% hold on
-% % if option == 2 || option == 3
-% %     hold on
-% %     plot(t,10*cpt(1,:),'r')
-% %     legend('Zone-1 Input', 'High/Low Price Time')
-% % end
 % xlabel('Hours');
 % ylabel('Power Input (kW)');
 % 
@@ -175,11 +143,11 @@ plot(t,ut(2,:),'k')
 % % figure
 % % subplot(2,3,5)
 % plot(t,ut(2,:),'k')
-% % if option == 2 || option == 3
-% %     hold on
-% %     plot(t,10*cpt(1,:),'r')
-% %     legend('Zone-2 Input', 'High/Low Price Time')
-% % end
+% if option == 2 || option == 3
+%     hold on
+%     plot(t,10*cpt(1,:),'r')
+%     legend('Zone-2 Input', 'High/Low Price Time')
+% end
 % xlabel('Hours');
 % ylabel('Power Input (kW)');
 % 
@@ -187,7 +155,6 @@ plot(t,ut(2,:),'k')
 % % figure
 % % subplot(2,3,6)
 % plot(t,ut(3,:),'c')
->>>>>>> 513603abdad1ebe884dffb5ae0d0fefda5c06d49
 % if option == 2 || option == 3
 %     hold on
 %     plot(t,10*cpt(1,:),'r')

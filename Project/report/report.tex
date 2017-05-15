@@ -108,14 +108,29 @@
 		\begin{equation}
 			J = C^T\left(\sum_{n=1}^N u_n\right)
 		\end{equation}
-		where $C=\begin{pmatrix} c & c & c\end{pmatrix}^T$ is a cost matrix, with $c=0.2$ \$/kWh. However, because this linear cost function might break some stability and recursive feasibility properties,a soft constraint formulation should be prefered. 
+		where $C=\begin{pmatrix} c & c & c\end{pmatrix}^T$ is a cost matrix, with $c=0.2$ \$/kWh. However, because this linear cost function might break some stability and recursive feasibility properties, a soft constraint formulation should be preferred. 
 	}
 	
 	\section{Soft Constraints}
 	{
-		\paragraph{} We hereinafter describe the soft constraints implementation of our controller and the obtained results. We decided to implement \emph{both} $L_2$ and $L_1$ penalization for the slack variables, in order to find a tradeoff between the amplitude of constraints violation and their duration. The actual optimization program we therefore solve writes : 
+	
+		\begin{figure}[ht!]
+			\begin{minipage}{0.45\linewidth}
+				\includegraphics[width=\linewidth]{soft_constraints_01}
+				\caption{Cost minimization with soft-constraints, $r_\eps=0.1$}
+				\label{fig::soft_constraints_01}
+			\end{minipage}
+			\hfill
+			\begin{minipage}{0.45\linewidth}
+				\includegraphics[width=\linewidth]{soft_constraints_10}
+				\caption{Cost minimization with soft-constraints, $r_\eps=10$}
+				\label{fig::soft_constraints_10}
+			\end{minipage}
+		\end{figure}
+		
+		\paragraph{} We hereinafter describe the soft constraints implementation of our controller and the obtained results. We decided to implement $L_2$ penalization for the slack variables, in order to limit constraints violation amplitude (a linear penalization would have penalized constraints violation duration instead). The actual optimization program we therefore solve writes : 
 		\begin{mini}|s|[2]
-  			{}{\sum_{n=1}^N\left[C^Tu_n +  r_1(\lVert \eps_n\rVert_2 +\lVert \eps_n\rVert_1) +  r_2(\lVert \hat{\eps}_n\rVert_2 +\lVert \hat{\eps}_n\rVert_1) \right]}
+  			{}{\sum_{n=1}^N\left[C^Tu_n +  r_\eps(\lVert \eps_n\rVert_2 +\lVert\hat{ \eps}_n\rVert_2)\right]}
   				 {\label{eq::svr}}{}
 				 \addConstraint{y_n \geq 22 - \hat{\eps}_n}{\quad & &n\in\{1,\hdots,N\}}
 				 \addConstraint{y_n \leq 26+\eps_n}{\quad & &n\in\{1,\hdots,N\}}
@@ -125,12 +140,36 @@
 				 \addConstraint{\hat{\eps}_n\geq 0}{\quad & &n\in\{1,\hdots,N\}}				 
 		\end{mini}
 		
-		\paragraph{} Figures (\ref{}) and (\ref{}) display the results obtained with this controller, given an horizon size $N=20$. 
-		\newline One can notice that if (for this example), recursive stability and feasibility seem to be achieved. We also notice that, as one can expect, the retained solution's output stays near its lower bound, since this one corresponds to a lower cost. 
+		\paragraph{} Figures (\ref{fig::soft_constraints_01}) and (\ref{fig::soft_constraints_10}) display the results obtained with this controller, given an horizon size $N=20$, with two different penalization coefficient $r_\eps$. 
+		\newline As one can expect, the retained solution's output stays near its lower bound, since this one corresponds to a lower cost. Also, by increasing the amplitude of the slack constraint amplitude, we reduce the size of the offset allowed by the tradeoff between constraints violation and cost minimization. 
+		
 	}
 	
-	\section{Night Setback}
+	\section{Variable Cost}
 	{
-	
+		\paragraph{} We now wish to optimize a rather more realistic cost function, taking into account the variation of electricity prices. We consider the following model for the electricity prices : 
+		\begin{equation}
+			\begin{aligned}
+				&c_k &= 0.2\$/kWh & &\quad \text{(between 12pm to 10am, and 4pm to 12pm)}\\
+				&c_k &= 0.04\$/kWh & &\quad \text{(between 10:00Hrs to 16:00Hrs)}
+			\end{aligned}
+		\end{equation}
+		This is achieved by specifying $c$ as a decision variable, provided at computation time. 
+		
+		\paragraph{} In the following, we consider $r_\eps = 1$ as well as $N = 20$. Figure (\ref{fig::var_cost_output}) displays the evolution of temperature given this control strategy. We can namely see that, starting a few hours before the days rises, the temperature in the office increases before dropping. Figure (\ref{fig::var_cost_inputs}) gives a better insight at what is going on in the controller (for room 1). Indeed, we see that at the end of the night, the controller is provided the prediction that the cost is soon to go up. To enable the constraints to be (softly) satisfied, without having to pay for expensive electricity in the morning, it peaks the input to warm up the different rooms. Therefore, during the day, it only has to buy a small amount of power to keep the temperature in its feasible region. 
+		
+		\begin{figure}[ht!]
+			\begin{minipage}{0.45\linewidth}
+				\includegraphics[width=\linewidth]{var_cost_output}
+				\caption{Variable cost minimization, $r\eps = 1$, $N = 20$}
+				\label{fig::var_cost_output}
+			\end{minipage}
+			\hfill
+			\begin{minipage}{0.45\linewidth}
+				\includegraphics[width=\linewidth]{var_cost_inputs}
+				\caption{Variable cost minimization, $r\eps = 1$, $N = 20$}
+				\label{fig::var_cost_inputs}
+			\end{minipage}
+		\end{figure}
 	}
 \end{document}
