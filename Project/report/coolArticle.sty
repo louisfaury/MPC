@@ -1,0 +1,93 @@
+% @file : coolarticle.sty
+% @author : Louis Faury
+% @date : 
+% @brief : Cool article package for unified templating 
+
+%Identification 
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{coolarticle}[05/11/2016 Cool Article Package]
+
+%% ----------------------------------------------------- PACKAGES ----------------------------------------------------- %%
+\RequirePackage[top=2cm, bottom=3cm, left=2.5cm, right=2.5cm]{geometry}
+\RequirePackage[francais,english]{babel}
+\RequirePackage[latin1]{inputenc}
+\RequirePackage[T1]{fontenc}
+\RequirePackage{graphicx}
+\RequirePackage{wrapfig}
+\RequirePackage{color}   
+\RequirePackage{calc}
+\RequirePackage{pifont}
+\RequirePackage{stmaryrd}
+\RequirePackage[dvipsnames]{xcolor}
+\RequirePackage{enumitem}
+\RequirePackage{hyperref}
+\RequirePackage{amsbsy}
+\RequirePackage{colortbl}
+\RequirePackage{fancyhdr}
+\RequirePackage{fancybox}		%fancy boxes 
+\RequirePackage{marvosym} 		%cool arrows
+\RequirePackage{array} 			%specify width of column in tabular
+\RequirePackage[most]{tcolorbox}   	
+\RequirePackage{coolMath}
+
+\definecolor{verylightgray}{rgb}{0.96,0.96,0.96}
+\definecolor{deepgreen}{RGB}{73,182,87}
+\definecolor{prettyred}{RGB}{229,67,67}
+\definecolor{prettyblue}{RGB}{63,90,199}
+\definecolor{coolorange}{RGB}{236,170,16}
+\definecolor{coolgreen}{RGB}{32,191,64}
+%% Thick rule file
+\makeatletter
+  \def\vhrulefill#1{\leavevmode\leaders\hrule\@height#1\hfill \kern\z@}
+\makeatother
+
+%% Cool colored arrows
+%\makeatletter
+%\newcommand\xleftrightarrow[2][]{%
+ % \ext@arrow 9999{\longleftrightarrowfill@}{#1}{#2}}
+%\newcommand\longleftrightarrowfill@{%
+  %\arrowfill@\leftarrow\relbar\rightarrow}
+%\makeatother
+
+%% \coolbox{external_color}{Title}{text} 
+\newcommand\coolbox[4][0.4pt]
+{
+	\setlength\fboxrule{#1}
+	\noindent\fcolorbox{#2}{verylightgray}{
+		\begin{minipage}{\linewidth}
+		\noindent \textbf{\textcolor{#2}{#3}} 
+	
+		\vspace{10pt}
+		
+			\hfill\begin{minipage}{0.95\linewidth}
+			#4
+			\end{minipage}
+		\end{minipage}
+		}
+}
+
+%% Titlebox : \titlebox{width}{Header}{Detail}
+\newcommand\titlebox[3]
+{
+	\begin{center}
+		\doublebox{		
+			\begin{minipage}{#1\linewidth}
+			\vspace{4pt}
+				\begin{center}
+					\large{
+						\textsf
+						{
+							\textbf
+							{
+								#2\\ 
+							}
+							#3
+						}
+					}
+				\end{center}
+			\vspace{3pt}
+			\end{minipage}
+		}
+		\end{center}
+}
+

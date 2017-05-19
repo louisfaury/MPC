@@ -5,6 +5,7 @@
 
 %% ----------------------------------------------------- PACKAGES ----------------------------------------------------- %%
 \usepackage{coolArticle}
+\usepackage{optidef}
 
 %% ---------------------------------------------------- DOCUMENT ---------------------------------------------------- %%
 \begin{document}
@@ -35,7 +36,7 @@
 			\end{aligned}\right.
 		\end{equation}
 		
-		\paragraph{} The disturbance will be considered as an input, since we have its prediction over a period of 8 days. Figure (\ref{fig::temp_pred}) and (\ref{fig::gain_pred}) provide a plot of those predictive value. We can namely notice that we observe a \emph{\textcolor{red}{circadian periodicity}} (periodicity of 24h for the different signals). 
+		\paragraph{} The disturbance will be considered as an input, since we have its prediction over a period of 8 days. Figure (\ref{fig::temp_pred}) and (\ref{fig::gain_pred}) provides a plot of those predictive value. We can namely notice that we observe a \emph{\textcolor{red}{circadian periodicity}} (periodicity of 24h for the different signals). 
 		
 		\begin{figure}[h!]
 			\begin{minipage}{0.45\linewidth}
@@ -98,7 +99,7 @@
 			\end{center}
 		\end{figure}
 		
-		\paragraph{} Because the controller is now able to consider the temperature raise due to the orientation of the room and the sun exposition, it allows a small undershoot by setting the corresponding input to 0 well before this event. Therefore, a smaller undershoot is achieved when increasing the horizon. 
+		\paragraph{} Because the controller is now able to consider the temperature rise due to the orientation of the room and the sun exposition, it allows a small undershoot by setting the corresponding input to 0 well before this event. Therefore, a smaller undershoot is achieved when increasing the horizon. 
 	}
    
    	\section{Economic MPC}
@@ -128,7 +129,7 @@
 			\end{minipage}
 		\end{figure}
 		
-		\paragraph{} We hereinafter describe the soft constraints implementation of our controller and the obtained results. We decided to implement $L_2$ penalization for the slack variables, in order to limit constraints violation amplitude (a linear penalization would have penalized constraints violation duration instead). The actual optimization program we therefore solve writes : 
+		\paragraph{} We hereinafter describe the soft constraints implementation of our controller and the obtained results. We decided to implement $L_2$ penalization for the slack variables, in order to limit constraints violation amplitude (a linear penalization would have penalized constraints violation duration instead). Indeed for comfort reasons, people in the rooms, would prefer to experience smaller deviation from the targeted temperature values for a long time than large deviation for small amounts of time. The actual optimization program we therefore solve writes : 
 		\begin{mini}|s|[2]
   			{}{\sum_{n=1}^N\left[C^Tu_n +  r_\eps(\lVert \eps_n\rVert_2 +\lVert\hat{ \eps}_n\rVert_2)\right]}
   				 {\label{eq::svr}}{}
@@ -154,8 +155,19 @@
 				&c_k &= 0.04\$/kWh & &\quad \text{(between 10:00Hrs to 16:00Hrs)}
 			\end{aligned}
 		\end{equation}
-		This is achieved by specifying $c$ as a decision variable, provided at computation time. 
-		
+		This is achieved by specifying $c$ as a decision variable, provided at computation time. In the minimization problem, cost matrix is no longer constant so that it rewrites:
+				\begin{mini}|s|[2]
+  			{}{\sum_{n=1}^N\left[C_n^Tu_n +  r_\eps(\lVert \eps_n\rVert_2 +\lVert\hat{ \eps}_n\rVert_2)\right]}
+  				 {\label{eq::svr}}{}
+				 \addConstraint{y_n \geq 22 - \hat{\eps}_n}{\quad & &n\in\{1,\hdots,N\}}
+				 \addConstraint{y_n \leq 26+\eps_n}{\quad & &n\in\{1,\hdots,N\}}
+				 \addConstraint{u_n \leq 15}{\quad & &n\in\{1,\hdots,N\}}
+				 \addConstraint{u_n \geq 0}{\quad & &n\in\{1,\hdots,N\}}
+				 \addConstraint{\eps_n\geq 0}{\quad & &n\in\{1,\hdots,N\}}
+				 \addConstraint{\hat{\eps}_n\geq 0}{\quad & &n\in\{1,\hdots,N\}}				 
+				\end{mini}
+		 
+		where $C_n = [c_n, c_n, c_n]^T$.
 		\paragraph{} In the following, we consider $r_\eps = 1$ as well as $N = 20$. Figure (\ref{fig::var_cost_output}) displays the evolution of temperature given this control strategy. We can namely see that, starting a few hours before the days rises, the temperature in the office increases before dropping. Figure (\ref{fig::var_cost_inputs}) gives a better insight at what is going on in the controller (for room 1). Indeed, we see that at the end of the night, the controller is provided with the prediction that the cost is soon to go up. To enable the constraints to be (softly) satisfied, without having to pay for expensive electricity in the morning, it peaks the input to warm up the different rooms. Therefore, during the day, it only has to buy a small amount of power to keep the temperature near its feasible region. 
 		
 		\begin{figure}[ht!]
