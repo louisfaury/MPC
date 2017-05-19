@@ -73,7 +73,7 @@
 			\end{aligned}
 		\end{equation}
 		In the following, $R$ is chosen to be $\mathds{1}_3$ (hence we are penalizing equally any fluctuations around the target value, independently of the room). Given a cost function, multiplying $R$ by a scalar value won't have any effect on the optimal solution. 
-		\newline We decided \emph{not to implement} a terminal cost nor terminal set constraints. This was mainly motivated by the fact that even with small horizons $N$, the system is \emph{experimentally} stable and recursively feasible. Hence, given the fact that the control invariant set could be computationally challenging to compute, and because its use would reduce the attraction zone in our state space, there was no real need to use terminal cost or terminal set. 
+		\newline We decided \emph{not to implement} a terminal cost nor terminal set constraints. This was mainly motivated by the fact that even with small horizons $N$, the system is \emph{experimentally} stable and recursively feasible. Hence, given the fact that the control invariant set could be computationally challenging to compute, and because its use would reduce the attraction zone in our state space, there was no real need to use terminal cost or terminal set. Moreover, the system is \emph{extremely reactive}, therefore we are able to reach, even with small horizons,  a cost that approximates the infinite horizon cost. 
 		
 		\paragraph{} Figures (\ref{fig::naivempc_N5_output}) and (\ref{fig::naivempc_N5_inputs}) respectively show the dynamics of the outputs and inputs of the systems control this MPC controller, given a horizon $N=5$, along their respective constraints and reference. 
 		
@@ -99,7 +99,8 @@
 			\end{center}
 		\end{figure}
 		
-		\paragraph{} Because the controller is now able to consider the temperature rise due to the orientation of the room and the sun exposition, it allows a small undershoot by setting the corresponding input to 0 well before this event. Therefore, a smaller undershoot is achieved when increasing the horizon. 
+		\paragraph{} Because the controller is now able to consider the temperature rise due to the orientation of the room and the sun exposition, it allows a small undershoot by setting the corresponding input to 0 well before this event. Therefore, a smaller undershoot is achieved when increasing the horizon, , since the room slightly cooled down before being being exposed to the sun. 
+
 	}
    
    	\section{Economic MPC}
@@ -173,14 +174,60 @@
 		\begin{figure}[ht!]
 			\begin{minipage}{0.45\linewidth}
 				\includegraphics[width=\linewidth]{var_cost_output}
-				\caption{Variable cost minimization, $r\eps = 1$, $N = 20$}
+				\caption{Variable cost minimization, $r_\eps = 1$, $N = 20$}
 				\label{fig::var_cost_output}
 			\end{minipage}
 			\hfill
 			\begin{minipage}{0.45\linewidth}
 				\includegraphics[width=\linewidth]{var_cost_inputs}
-				\caption{Variable cost minimization, $r\eps = 1$, $N = 20$}
+				\caption{Variable cost minimization, $r_\eps = 1$, $N = 20$}
 				\label{fig::var_cost_inputs}
+			\end{minipage}
+		\end{figure}
+	}
+	
+	\section{Night Setbacks}
+	{
+		\paragraph{} We will now implement time varying comfort constraints. The ideao is that outside of office hours, we would like to relax the output's constraints in order to safe money by avoiding unnecessary heating. Practically, we will consider the following constraints : 
+		\begin{equation}
+		\left\{
+			\begin{aligned}
+				&y^{max} = 30° & \quad& \text{between 12pm to 0am, and 6pm to 12pm} \\
+				&y^{max} = 26° &\quad & \text{between 8am to 6pm} \\
+				&y^{min} = 18° &\quad & \text{between 12pm to 0am, and 6pm to 12pm} \\
+				&y^{min} = 22° & \quad& \text{between 8am to 6pm} \\
+			\end{aligned}\right.
+		\end{equation}
+		
+		
+		Minimization problem therefore becomes:
+		
+						\begin{mini}|s|[2]
+  			{}{\sum_{n=1}^N\left[C_n^Tu_n +  r_\eps(\lVert \eps_n\rVert_2 +\lVert\hat{ \eps}_n\rVert_2)\right]}
+  				 {\label{eq::svr}}{}
+				 \addConstraint{y_n \geq y^{min}_k - \hat{\eps}_n}{\quad & &n\in\{1,\hdots,N\}}
+				 \addConstraint{y_n \leq y^{max}_k +\eps_n}{\quad & &n\in\{1,\hdots,N\}}
+				 \addConstraint{u_n \leq 15}{\quad & &n\in\{1,\hdots,N\}}
+				 \addConstraint{u_n \geq 0}{\quad & &n\in\{1,\hdots,N\}}
+				 \addConstraint{\eps_n\geq 0}{\quad & &n\in\{1,\hdots,N\}}
+				 \addConstraint{\hat{\eps}_n\geq 0}{\quad & &n\in\{1,\hdots,N\}}				 
+				\end{mini}
+		
+		\paragraph{} Figures (\ref{fig::temp_setback}) and (\ref{fig::inputs_setback})  respectively display the output (temperature) for the three different rooms (with the time varying constraints), as well as the input the the first room (alongside the cost zones). 
+		\newline As one can notice, the temperature constraints are still met. More importantly, the controller let the temperature drop for most of night (when no one is in office), before strongly heating  the building (taking advantage of the low cost of electricity by the end of the night). The temperature then drops when the employees begin in order to meet the actualized constraints. 
+		\newline A slightly different behavior can be observed by the end of the predictions. Indeed, near hour 130, we can see that the controller imposes (unusual) stronger inputs in the morning. Indeed, because at that moment the solar gain are fairly weak and the outside temperature is rather cold, the controller needs to impose higher temperature in the morning before allowing it top drop to the lower-bound constraint. 
+		
+		\begin{figure}[ht!]
+			\begin{minipage}{0.45\linewidth}
+				\includegraphics[width=\linewidth]{temp_setback}
+				\caption{Variable cost minimization with night set-backs, $r_\eps = 1$, $N = 30$}
+				\label{fig::temp_setback}
+			\end{minipage}
+			\hfill
+			\begin{minipage}{0.45\linewidth}
+				\includegraphics[width=\linewidth]{inputs_setback}
+				\caption{Variable cost minimization with night-setbacks, $r_\eps = 1$, $N = 30$}
+				\label{fig::inputs_setback}
 			\end{minipage}
 		\end{figure}
 	}
