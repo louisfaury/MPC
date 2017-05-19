@@ -18,7 +18,7 @@
 
 
 
-function [ xt, yt, ut, cpt, t ] = simBuild( controller, T, fhandle, N, option)
+function [ xt, yt, ut, cpt, sbt, t ] = simBuild( controller, T, fhandle, N, option)
 
 load building.mat;
 load battery.mat;
@@ -69,8 +69,8 @@ end
 xt(:,i) = x;
 ut(:,i) = U(1:nu,1);
 yt(:,i) = C*x;
-
 t(1,i) = i;
+sbt = [sbMax(1,:)',sbMin(1,:)'];
 
 disp(['Iteration ' int2str(i)])
 yalmiperror(id)
