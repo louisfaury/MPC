@@ -149,6 +149,20 @@
 	
 	\section{Variable Cost}
 	{
+	\begin{figure}[ht!]
+			\begin{minipage}{0.45\linewidth}
+				\includegraphics[width=\linewidth]{var_cost_output}
+				\caption{Variable cost minimization, $r_\eps = 1$, $N = 20$}
+				\label{fig::var_cost_output}
+			\end{minipage}
+			\hfill
+			\begin{minipage}{0.45\linewidth}
+				\includegraphics[width=\linewidth]{var_cost_inputs}
+				\caption{Variable cost minimization, $r_\eps = 1$, $N = 20$}
+				\label{fig::var_cost_inputs}
+			\end{minipage}
+		\end{figure}
+
 		\paragraph{} We now wish to optimize a rather more realistic cost function, taking into account the variation of electricity prices. We consider the following model for the electricity prices : 
 		\begin{equation}
 			\begin{aligned}
@@ -170,20 +184,6 @@
 		 
 		where $C_n = [c_n, c_n, c_n]^T$.
 		\paragraph{} In the following, we consider $r_\eps = 1$ as well as $N = 20$. Figure (\ref{fig::var_cost_output}) displays the evolution of temperature given this control strategy. We can namely see that, starting a few hours before the days rises, the temperature in the office increases before dropping. Figure (\ref{fig::var_cost_inputs}) gives a better insight at what is going on in the controller (for room 1). Indeed, we see that at the end of the night, the controller is provided with the prediction that the cost is soon to go up. To enable the constraints to be (softly) satisfied, without having to pay for expensive electricity in the morning, it peaks the input to warm up the different rooms. Therefore, during the day, it only has to buy a small amount of power to keep the temperature near its feasible region. 
-		
-		\begin{figure}[ht!]
-			\begin{minipage}{0.45\linewidth}
-				\includegraphics[width=\linewidth]{var_cost_output}
-				\caption{Variable cost minimization, $r_\eps = 1$, $N = 20$}
-				\label{fig::var_cost_output}
-			\end{minipage}
-			\hfill
-			\begin{minipage}{0.45\linewidth}
-				\includegraphics[width=\linewidth]{var_cost_inputs}
-				\caption{Variable cost minimization, $r_\eps = 1$, $N = 20$}
-				\label{fig::var_cost_inputs}
-			\end{minipage}
-		\end{figure}
 	}
 	
 	\section{Night Setbacks}
@@ -213,10 +213,6 @@
 				 \addConstraint{\hat{\eps}_n\geq 0}{\quad & &n\in\{1,\hdots,N\}}				 
 				\end{mini}
 		
-		\paragraph{} Figures (\ref{fig::temp_setback}) and (\ref{fig::inputs_setback})  respectively display the output (temperature) for the three different rooms (with the time varying constraints), as well as the input the the first room (alongside the cost zones). 
-		\newline As one can notice, the temperature constraints are still met. More importantly, the controller let the temperature drop for most of night (when no one is in office), before strongly heating  the building (taking advantage of the low cost of electricity by the end of the night). The temperature then drops when the employees begin in order to meet the actualized constraints. 
-		\newline A slightly different behavior can be observed by the end of the predictions. Indeed, near hour 130, we can see that the controller imposes (unusual) stronger inputs in the morning. Indeed, because at that moment the solar gain are fairly weak and the outside temperature is rather cold, the controller needs to impose higher temperature in the morning before allowing it top drop to the lower-bound constraint. 
-		
 		\begin{figure}[ht!]
 			\begin{minipage}{0.45\linewidth}
 				\includegraphics[width=\linewidth]{temp_setback}
@@ -230,5 +226,42 @@
 				\label{fig::inputs_setback}
 			\end{minipage}
 		\end{figure}
+
+
+		\paragraph{} Figures (\ref{fig::temp_setback}) and (\ref{fig::inputs_setback})  respectively display the output (temperature) for the three different rooms (with the time varying constraints), as well as the input the the first room (alongside the cost zones). 
+		\newline As one can notice, the temperature constraints are still met. More importantly, the controller let the temperature drop for most of the night (when no one is in office), before strongly heating  the building (taking advantage of the low cost of electricity by the end of the night). The temperature then drops when the employees begin in order to meet the actualized constraints. 
+		\newline A slightly different behavior can be observed by the end of the available prediction time. Indeed, near hour 130, we can see that the controller imposes (unusual) stronger inputs in the morning. Indeed, because at that moment the solar gain are fairly weak and the outside temperature is rather cold, the controller needs to impose higher temperature in the morning before allowing it top drop to the lower-bound constraint. 
+	}
+	
+	\section{Battery storage}
+	{
+		\paragraph{} In this section, we study the effect of having an electricity buffer (a battery) between the grid and the building. The charging power of the battery has lower and upper bound constraints. The idea is that we might be able to store cheap energy when it is cheap, and use that energy during the day, when buying it directly from the grid would be expensive. 
+		
+		\begin{figure}[ht!]
+			\begin{minipage}{0.5\linewidth}
+				\includegraphics[width=\linewidth]{battery_purchase}
+				\caption{Electrical power purchase ($N$=30)}
+				\label{fig::battery_purchase}
+			\end{minipage}
+			\hfill
+			\begin{minipage}{0.5\linewidth}
+				\includegraphics[width=\linewidth]{battery_charge}
+				\caption{Battery's charging power and charge level ($N=30$)}
+				\label{fig::battery_charge}
+			\end{minipage}
+		\end{figure}
+		
+		\begin{figure}[h!]
+			\begin{center}
+				\includegraphics[width=0.5\linewidth]{battery_temp}
+				\caption{Temperature evolution when using a battery ($N=20$)}
+				\label{fig::temp_battery}
+			\end{center}
+		\end{figure}
+		
+		\paragraph{} Figures (\ref{fig::battery_purchase}) and (\ref{fig::battery_charge}) respectively display the power purchased from the grid and the charging power / capacity of the battery, along with the variation of the electrical power price. As expected, when internal gains, solar exposition, .. allow it, all most of the power is purchased when the price are low. Indeed, unlike when we did not consider this electricity buffer, some power was still needed during the day, when now almost none is bought at this period (this assertion becomes false when the battery storage is not enough to prevent temperature drops in the day - starting near hour 130). 
+		\newline Also, one can notice that when electrical power is purchased, it is either use to directly warm the building or is stored in the battery. The battery discharges during the day, using the low price electricity that was bought the day before (figure (\ref{fig::battery_charge})). 
+		
+		\paragraph{} Figures (\ref{fig::temp_battery}) shows the system's output (temperature) variations. If we compare it with figures (\ref{fig::temp_setback}), we see that there is no more need for extreme (near saturation) heating by the end of the night. The controller simply needs to charge up the battery (it also warms the building to match the daytime temperature constraints) and discharge it during the day to keep the output inside its feasible region. The temperature in the building remains in the employees comfort zone, with much smoother dynamics. 
 	}
 \end{document}

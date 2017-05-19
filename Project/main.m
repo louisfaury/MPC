@@ -192,6 +192,6 @@ for i=2:N
 end
 controller = optimizer(constraints,objective,options,{x{1}, xb{1}, [d{:}], [cp{:}], [sb{:}]},{[u{:}; v{:}; e{:}]});
 % Runs simulation
-[xt,yt,ut,t,cpt,sbt,et,xbt,vt] = simBuildStorage(controller, 100, @shiftPred, N);
+[xt,yt,ut,t,cpt,sbt,et,xbt,vt] = simBuildStorage(controller, 576-N, @shiftPred, N);
 % Plots results 
  plots(t,yt,ut,cpt,sbt,xbt,et,vt,4);

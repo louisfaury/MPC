@@ -63,6 +63,7 @@ function plots(t,yt,ut,cpt,sbt,xbt,et,vt,flag)
      title('MPC Control Inputs');
  end
  if (flag==4)
+     % Temperatures (output)
      figure; hold on;
      t1  = plot(t,yt(1,:),'LineWidth',1.5,'Color','b');
      t2  = plot(t,yt(2,:),'LineWidth',1.5,'Color','r');
@@ -74,30 +75,31 @@ function plots(t,yt,ut,cpt,sbt,xbt,et,vt,flag)
      title('Output tracking - building room temperature');
      xlabel('Hours'); ylabel('Temperature (C)');
      ylim([16,35]);
+     % Power (input)
      figure; hold on;
      u1  = stairs(t,ut(1,:),'LineWidth',1.5,'Color','b');
      con = plot(t,zeros(size(t)),'-.','LineWidth',1.5,'Color','k');
      plot(t,15*ones(size(t)),'-.','LineWidth',1.5,'Color','k');
-     p    = plot(t,10*cpt,'LineWidth',1,'Color','r');
+     p    = plot(t,10*cpt,'LineWidth',1.5,'Color','r');
      xlabel('Hours'); ylabel('Power Input (kW');
      legend([u1,con,p],{'Input Room 1','Inputs constraints','High/Low Price Time'});
      title('MPC Control Inputs');
-     figure; hold on;
-     subplot(2,1,1);plot(t,xbt(1,:),'LineWidth',1.5,'Color','b')
+     
+     % Battery's state and purchased power    
+     figure;
+     subplot(2,1,1); hold on;
+     plot(t,et(1,:),'LineWidth',1.5,'Color','g');
+     plot(t,50*cpt,'-','LineWidth',1.5,'Color','r');
+     legend('Electrical Power Purchased','High/Low Price Time');
+     ylabel('Purchased Power');
      xlabel('Hours');
-     ylabel('Storage State');
-     subplot(2,1,2);hold on;
-     plot(t,et(1,:),'LineWidth',1.5,'Color','b')
-     plot(t,10*cpt,'LineWidth',1.5,'Color','r')
-     legend('Electrical Power Purchased','High/Low Price Time')
+     subplot(2,1,2); hold on;
+     plot(t,vt(1,:),'-','LineWidth',1.5,'Color','b');
+     plot(t,xbt(1,:),'-','LineWidth',1.5,'Color','c');
+     plot(t,50*cpt,'-','LineWidth',1.5,'Color','r');
+     plot(t,[20;-20].*ones(2,size(t,2)),'k-.','LineWidth',1.5);
      xlabel('Hours');
-     ylabel('Power purchased (kW)');
-     figure
-     plot(t,vt(1,:),'LineWidth',1.5,'Color','b');
-     hold on
-     plot(t,10*cpt(1,:),'Color','r')
-     legend('Power to storage Purchased','High/Low Price Time')
-     xlabel('Hours');
-     ylabel('Power input to the Storage (kW)');
+     ylabel('Storage');
+     legend('Battery Output Power','Stored Electrical Power','High/Low Price Time','Battery Output Power Constraints');
  end
 end
