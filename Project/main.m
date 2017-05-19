@@ -64,7 +64,7 @@ dist   = zeros(3,1);
 % % Runs simulation 
 % [~,yt,ut,~,~,t] = simBuild(controller,576-N,@shiftPred,N,1);
 % % Plots results
-% plots(t,yt,ut,0,0,1)
+% plots(t,yt,ut,0,0,0,0,0,1)
 
 
 %% SECTION 2: economic MPC and soft constraints
@@ -94,7 +94,7 @@ dist   = zeros(3,1);
 % % Runs simulation
 % [~,yt,ut,~,~,t] = simBuild(controller,576-N,@shiftPred,N,1);
 % % Plots results
-% plots(t,yt,ut,0,0,1);
+% plots(t,yt,ut,0,0,0,0,0,1);
 
 %% SECTION 3: economic, soft constraints, and variable cost
 % % Define shorizon 
@@ -124,44 +124,44 @@ dist   = zeros(3,1);
 % % Runs simulation
 % [~,yt,ut,cpt,~,t] = simBuild(controller,576-N,@shiftPred,N,2);
 % % Plots results
-% plots(t,yt,ut,cpt,0,2);
+% plots(t,yt,ut,cpt,0,0,0,0,2);
 
 %% Section 4 : Night setbacks
-% define horizon 
-N = 30;
-% defines sdpvars
-x   = sdpvar(10*ones(1,N),ones(1,N));
-u   = sdpvar(3*ones(1,N-1),ones(1,N-1));
-y   = sdpvar(3*ones(1,N),ones(1,N));
-d   = sdpvar(3*ones(1,N),ones(1,N));
-eps = sdpvar(6*ones(1,N), ones(1,N));       % soft constraints 
-cp  = sdpvar(3*ones(1,N-1),ones(1,N-1));    % variable cost
-sb  = sdpvar(6*ones(1,N), ones(1,N));       % night setbacks
-
-% define constraints over horizon as well as objective function 
-R_eps   = 1*eye(6,6);      % soft constraints penalty
-
-constraints = [];  
-objective   = 0;
-options = sdpsettings('verbose',1,'solver','+gurobi');   % Use Gurobi solver
-for i=2:N
-    constraints = [constraints, x{i} == A*x{i-1}+ Bu*u{i-1} + Bd*d{i-1}];
-    constraints = [constraints, y{i} == C*x{i}];
-    constraints = [constraints, Hy*y{i} <= sb{i} + eps{i}];
-    constraints = [constraints, eps{i} >= zeros(6,1)];
-    constraints = [constraints, Hu*u{i-1} <= hu];
-    objective = objective + cp{i-1}'*u{i-1} + eps{i}'*R_eps*eps{i};
-end
-controller = optimizer(constraints,objective,options,{x{1},[d{:}], [cp{:}], [sb{:}]},[u{:}]);
-% Runs simulation 
-[~,yt,ut,cpt,sbt,t] = simBuild(controller,576-N,@shiftPred,N,3);
-% Plots results 
- plots(t,yt,ut,cpt,sbt,3);
+% % Defines horizon 
+% N = 30;
+% % Defines sdpvars
+% x   = sdpvar(10*ones(1,N),ones(1,N));
+% u   = sdpvar(3*ones(1,N-1),ones(1,N-1));
+% y   = sdpvar(3*ones(1,N),ones(1,N));
+% d   = sdpvar(3*ones(1,N),ones(1,N));
+% eps = sdpvar(6*ones(1,N), ones(1,N));       % soft constraints 
+% cp  = sdpvar(3*ones(1,N-1),ones(1,N-1));    % variable cost
+% sb  = sdpvar(6*ones(1,N), ones(1,N));       % night setbacks
+% 
+% % Defines constraints over horizon as well as objective function 
+% R_eps   = 1*eye(6,6);      % soft constraints penalty
+% 
+% constraints = [];  
+% objective   = 0;
+% options = sdpsettings('verbose',1,'solver','+gurobi');   % Use Gurobi solver
+% for i=2:N
+%     constraints = [constraints, x{i} == A*x{i-1}+ Bu*u{i-1} + Bd*d{i-1}];
+%     constraints = [constraints, y{i} == C*x{i}];
+%     constraints = [constraints, Hy*y{i} <= sb{i} + eps{i}];
+%     constraints = [constraints, eps{i} >= zeros(6,1)];
+%     constraints = [constraints, Hu*u{i-1} <= hu];
+%     objective = objective + cp{i-1}'*u{i-1} + eps{i}'*R_eps*eps{i};
+% end
+% controller = optimizer(constraints,objective,options,{x{1},[d{:}], [cp{:}], [sb{:}]},[u{:}]);
+% % Runs simulation 
+% [~,yt,ut,cpt,sbt,t] = simBuild(controller,576-N,@shiftPred,N,3);
+% % Plots results 
+%  plots(t,yt,ut,cpt,sbt,0,0,0,3);
  
 %% Section 5 : Battery coupled with the building
-% define horizon 
-N = 50;
-% defines sdpvars
+% Defines horizon 
+N = 30;
+% Defines sdpvars
 x       = sdpvar(10*ones(1,N),ones(1,N));
 u       = sdpvar(3*ones(1,N-1),ones(1,N-1));
 y       = sdpvar(3*ones(1,N),ones(1,N));
@@ -172,10 +172,8 @@ sb      = sdpvar(6*ones(1,N), ones(1,N));       % night setbacks
 xb      = sdpvar(ones(1,N), ones(1,N));         % battery storage
 e       = sdpvar(ones(1,N-1), ones(1,N-1));     % energy got from the grid
 v       = sdpvar(ones(1,N-1), ones(1,N-1));
-
-% define constraints over horizon as well as objective function 
+% Defines constraints over horizon as well as objective function 
 R_eps   = 1*eye(6,6);      % soft constraints penalty
-
 constraints = [];  
 objective   = 0;
 options = sdpsettings('verbose',1,'solver','+gurobi');   % Use Gurobi solver
@@ -190,9 +188,10 @@ for i=2:N
     constraints = [constraints, xb{i} == a*xb{i-1} + b*v{i-1}];
     constraints = [constraints, Hxb*xb{i} <= hxb];
     constraints = [constraints, Hv*v{i-1} <= hv];
-    
     objective = objective + cp{i-1}*e{i-1} + eps{i}'*R_eps*eps{i};
 end
 controller = optimizer(constraints,objective,options,{x{1}, xb{1}, [d{:}], [cp{:}], [sb{:}]},{[u{:}; v{:}; e{:}]});
-
-simBuildStorage(controller, 200, @shiftPred, N)
+% Runs simulation
+[xt,yt,ut,t,cpt,sbt,et,xbt,vt] = simBuildStorage(controller, 100, @shiftPred, N);
+% Plots results 
+ plots(t,yt,ut,cpt,sbt,xbt,et,vt,4);
