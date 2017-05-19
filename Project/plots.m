@@ -86,7 +86,8 @@ function plots(t,yt,ut,cpt,sbt,xbt,et,vt,flag)
      subplot(2,1,1);plot(t,xbt(1,:),'LineWidth',1.5,'Color','b')
      xlabel('Hours');
      ylabel('Storage State');
-     subplot(2,1,2);plot(t,et(1,:),'LineWidth',1.5,'Color','b')
+     subplot(2,1,2);hold on;
+     plot(t,et(1,:),'LineWidth',1.5,'Color','b')
      plot(t,10*cpt,'LineWidth',1.5,'Color','r')
      legend('Electrical Power Purchased','High/Low Price Time')
      xlabel('Hours');
