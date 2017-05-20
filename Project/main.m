@@ -198,46 +198,8 @@ dist   = zeros(3,1);
 
  %% SECTION 6 : several simulations with different battery properties 
  % Varying the battery's dissipation factor
-%  alpha_array = [0.25 0.5 0.75 1];
-%  % Defines horizon
-%  N = 30;
-%  % Defines sdpvars
-%  x       = sdpvar(10*ones(1,N),ones(1,N));
-%  u       = sdpvar(3*ones(1,N-1),ones(1,N-1));
-%  y       = sdpvar(3*ones(1,N),ones(1,N));
-%  d       = sdpvar(3*ones(1,N),ones(1,N));
-%  eps     = sdpvar(6*ones(1,N), ones(1,N));       % soft constraints
-%  cp      = sdpvar(ones(1,N-1),ones(1,N-1));      % variable cost for e_k this time
-%  sb      = sdpvar(6*ones(1,N), ones(1,N));       % night setbacks
-%  xb      = sdpvar(ones(1,N), ones(1,N));         % battery storage
-%  e       = sdpvar(ones(1,N-1), ones(1,N-1));     % energy got from the grid
-%  v       = sdpvar(ones(1,N-1), ones(1,N-1));
-%  % Defines constraints over horizon as well as objective function
-%  R_eps   = 1*eye(6,6);      % soft constraints penalty
-%  options = sdpsettings('verbose',1,'solver','+gurobi');   % Use Gurobi solver
-%  for alpha = alpha_array
-%      objective   = 0;
-%      constraints = [];
-%      for i=2:N
-%          constraints = [constraints, x{i} == A*x{i-1}+ Bu*u{i-1} + Bd*d{i-1}];
-%          constraints = [constraints, y{i} == C*x{i}];
-%          constraints = [constraints, Hy*y{i} <= sb{i} + eps{i}];
-%          constraints = [constraints, eps{i} >= zeros(6,1)];
-%          constraints = [constraints, Hu*u{i-1} <= hu];
-%          constraints = [constraints, e{i-1} >= 0];
-%          constraints = [constraints, v{i-1} == e{i-1} - ones(1,3)*u{i-1}];
-%          constraints = [constraints, xb{i} == alpha*xb{i-1} + b*v{i-1}];
-%          constraints = [constraints, Hxb*xb{i} <= hxb];
-%          constraints = [constraints, Hv*v{i-1} <= hv];
-%          objective = objective + cp{i-1}*e{i-1} + eps{i}'*R_eps*eps{i};
-%      end
-%      controller = optimizer(constraints,objective,options,{x{1}, xb{1}, [d{:}], [cp{:}], [sb{:}]},{[u{:}; v{:}; e{:}]});
-%      % Runs simulation
-%      [xt,yt,ut,t,cpt,sbt,et,xbt,vt] = simBuildStorage(controller, 576-N, @shiftPred, N);
-%      % Plots results
-%      plots(t,yt,ut,cpt,sbt,xbt,et,vt,5);
-%  end
- hxb_array = [[10 0]',[30 0]',[50,0]',[100,0]'];
+ alpha_array = [0.25 0.5 0.75 1];
+ cost        = zeros(1, size(alpha_array, 2));
  % Defines horizon
  N = 30;
  % Defines sdpvars
@@ -254,7 +216,9 @@ dist   = zeros(3,1);
  % Defines constraints over horizon as well as objective function
  R_eps   = 1*eye(6,6);      % soft constraints penalty
  options = sdpsettings('verbose',1,'solver','+gurobi');   % Use Gurobi solver
- for hxb = hxb_array
+
+ k=1;
+ for alpha = alpha_array
      objective   = 0;
      constraints = [];
      for i=2:N
@@ -265,7 +229,7 @@ dist   = zeros(3,1);
          constraints = [constraints, Hu*u{i-1} <= hu];
          constraints = [constraints, e{i-1} >= 0];
          constraints = [constraints, v{i-1} == e{i-1} - ones(1,3)*u{i-1}];
-         constraints = [constraints, xb{i} == a*xb{i-1} + b*v{i-1}];
+         constraints = [constraints, xb{i} == alpha*xb{i-1} + b*v{i-1}];
          constraints = [constraints, Hxb*xb{i} <= hxb];
          constraints = [constraints, Hv*v{i-1} <= hv];
          objective = objective + cp{i-1}*e{i-1} + eps{i}'*R_eps*eps{i};
@@ -274,6 +238,71 @@ dist   = zeros(3,1);
      % Runs simulation
      [xt,yt,ut,t,cpt,sbt,et,xbt,vt] = simBuildStorage(controller, 576-N, @shiftPred, N);
      % Plots results
-     plots(t,yt,ut,cpt,sbt,xbt,et,vt,5,hxb(1));
+     plots(t,yt,ut,cpt,sbt,xbt,et,vt,5, hxb(1));
+    % Compute total cost in dollars
+      cost(1,k) = sum(cpt.*et);
+      k=k+1;
+ end
+ % Disp total costs
+ disp('####################')
+ disp('')
+ disp('ENERGY BILLS:')
+ for i=1:size(cost,2)
+     disp(strcat('Dissipation factor: ' , num2str(alpha_array(1,i)), '   / Total cost: ', num2str(round(cost(1,i),2)), '$'));
  end
  
+ % Varying the battery's strorage capacity
+%  hxb_array = [[10 0]',[30 0]',[50,0]',[100,0]'];
+%  cost      = zeros(1, size(hxb_array, 2));
+%  % Defines horizon
+%  N = 30;
+%  % Defines sdpvars
+%  x       = sdpvar(10*ones(1,N),ones(1,N));
+%  u       = sdpvar(3*ones(1,N-1),ones(1,N-1));
+%  y       = sdpvar(3*ones(1,N),ones(1,N));
+%  d       = sdpvar(3*ones(1,N),ones(1,N));
+%  eps     = sdpvar(6*ones(1,N), ones(1,N));       % soft constraints
+%  cp      = sdpvar(ones(1,N-1),ones(1,N-1));      % variable cost for e_k this time
+%  sb      = sdpvar(6*ones(1,N), ones(1,N));       % night setbacks
+%  xb      = sdpvar(ones(1,N), ones(1,N));         % battery storage
+%  e       = sdpvar(ones(1,N-1), ones(1,N-1));     % energy got from the grid
+%  v       = sdpvar(ones(1,N-1), ones(1,N-1));
+%  % Defines constraints over horizon as well as objective function
+%  R_eps   = 1*eye(6,6);      % soft constraints penalty
+%  options = sdpsettings('verbose',1,'solver','+gurobi');   % Use Gurobi solver
+%  
+%  k=1;
+%  for hxb = hxb_array
+%      objective   = 0;
+%      constraints = [];
+%      for i=2:N
+%          constraints = [constraints, x{i} == A*x{i-1}+ Bu*u{i-1} + Bd*d{i-1}];
+%          constraints = [constraints, y{i} == C*x{i}];
+%          constraints = [constraints, Hy*y{i} <= sb{i} + eps{i}];
+%          constraints = [constraints, eps{i} >= zeros(6,1)];
+%          constraints = [constraints, Hu*u{i-1} <= hu];
+%          constraints = [constraints, e{i-1} >= 0];
+%          constraints = [constraints, v{i-1} == e{i-1} - ones(1,3)*u{i-1}];
+%          constraints = [constraints, xb{i} == a*xb{i-1} + b*v{i-1}];
+%          constraints = [constraints, Hxb*xb{i} <= hxb];
+%          constraints = [constraints, Hv*v{i-1} <= hv];
+%          objective = objective + cp{i-1}*e{i-1} + eps{i}'*R_eps*eps{i};
+%      end
+%      controller = optimizer(constraints,objective,options,{x{1}, xb{1}, [d{:}], [cp{:}], [sb{:}]},{[u{:}; v{:}; e{:}]});
+%      % Runs simulation
+%      [xt,yt,ut,t,cpt,sbt,et,xbt,vt] = simBuildStorage(controller, 576-N, @shiftPred, N);
+%      % Plots results
+%      plots(t,yt,ut,cpt,sbt,xbt,et,vt,5,hxb(1));
+%      % Compute total cost in dollars
+%      cost(1,k) = sum(cpt.*et);
+%      k=k+1;
+%  end
+%  
+%  % Disp total costs
+%  disp('####################')
+%  disp('')
+%  disp('ENERGY BILLS:')
+%  for i=1:size(cost,2)
+%      disp(strcat('Storage limit: ' , num2str(hxb_array(1,i)), 'kWh    / Total cost: ', num2str(round(cost(1,i),2)), '$'));
+%  end
+%  
