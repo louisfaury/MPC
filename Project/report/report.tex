@@ -235,6 +235,8 @@
 	
 	\section{Battery storage}
 	{
+		\subsection{Initial settings}
+		{
 		\paragraph{} In this section, we study the effect of having an electricity buffer (a battery) between the grid and the building. The charging power of the battery has lower and upper bound constraints. The idea is that we might be able to store cheap energy when it is cheap, and use that energy during the day, when buying it directly from the grid would be expensive. 
 		
 		\begin{figure}[ht!]
@@ -263,5 +265,78 @@
 		\newline Also, one can notice that when electrical power is purchased, it is either use to directly warm the building or is stored in the battery. The battery discharges during the day, using the low price electricity that was bought the day before (figure (\ref{fig::battery_charge})). 
 		
 		\paragraph{} Figures (\ref{fig::temp_battery}) shows the system's output (temperature) variations. If we compare it with figures (\ref{fig::temp_setback}), we see that there is no more need for extreme (near saturation) heating by the end of the night. The controller simply needs to charge up the battery (it also warms the building to match the daytime temperature constraints) and discharge it during the day to keep the output inside its feasible region. The temperature in the building remains in the employees comfort zone, with much smoother dynamics. 
+	}
+		\subsection{Varying the battery's constraints}
+		{
+			\paragraph{} We now wish to vary two of the battery's characteristics : its dissipation factor $\alpha$ as well as its capacity $\tilde{x}$. 
+			\paragraph{} We expect that as $\alpha$ will get close to 1, the battery will tend to charge  to its maximum capacity at an arbitrary time during a low price time (since their is no loss of energy due to dissipation). However, as $\alpha$ goes to 0, we expect that the controller will wait untill the very end of the low-price time to charge the battery, in order to be able to use most of it during the high-price time, without losing a fairly sizable portion of it in dissipation. 
+			\paragraph{} If we increase the capacity of the battery, we expect the controller to continue charging the battery up to its saturation during low-price times. However, we might reach a point where the capacity of the battery exceed the needs of the controller - at that point, we won't need to reach the battery's saturation. Also, as we decrease the capacity of the controller, the controller will need to buy more high-price electricity to directly heat the building. 
+			
+			\paragraph{} We first decided to make the dissipation term $\alpha$ vary in $\{0.25,0.5,0.75,1\}$. Figures (\ref{fig::alpha_025}), (\ref{fig::alpha_05}), (\ref{fig::alpha_075}) and (\ref{fig::alpha_1}) display the corresponding results. The battery storage upper-bound was kept at its nominal value. 
+			
+			\begin{figure}[ht!]
+			\begin{minipage}{0.45\linewidth}
+				\includegraphics[width=\linewidth]{alpha_025}
+				\caption{Electrical power purchase and battery storage level ($N=30, \, \alpha = 0.25$))}
+				\label{fig::alpha_025}
+			\end{minipage}
+			\hfill
+			\begin{minipage}{0.45\linewidth}
+				\includegraphics[width=\linewidth]{alpha_05}
+				\caption{Electrical power purchase and battery storage level ($N=30, \, \alpha = 0.5$))}
+				\label{fig::alpha_05}
+			\end{minipage}
+			\end{figure}
+			\begin{figure}[ht!]
+			\begin{minipage}{0.45\linewidth}
+				\includegraphics[width=\linewidth]{alpha_075}
+				\caption{Electrical power purchase and battery storage level ($N=30, \, \alpha = 0.75$))}
+				\label{fig::alpha_075}
+			\end{minipage}
+			\hfill
+			\begin{minipage}{0.45\linewidth}
+				\includegraphics[width=\linewidth]{alpha_1}
+				\caption{Electrical power purchase and battery storage level ($N=30, \, \alpha = 0.75$))}
+				\label{fig::alpha_1}
+			\end{minipage}
+		\end{figure}
+		
+		\paragraph{} We can see that for a very low dissipation factor ($\alpha = 0.25$), the controller does not bother charging the battery when the forecast announces sun (first 130 hours). Indeed, charging the battery is not relevant since most of the power will be lost in dissipation. Actually, in this setting, the temperature dissipation in the room is slower, hence it is more relevant to directly heat the room. As $\alpha$ increases, more and more power is stored in the battery. For the extreme case where $\alpha=1$, there is very few power bought during high-price time. Also, one can see that in this case where there is no dissipation, the battery charge as soon as the electricity price drop. It reaches it maximum before the beginning of the high-price time-zone, to be used to heat the room afterwards. 
+			
+			\paragraph{} We set back $\alpha=0.98$ (nominal setting) and decided to vary the battery storage limit. Recall that the storage $xb$ complies with : 
+			\begin{equation}
+				H_{xb}\cdot xb = h_{xb}
+			\end{equation}
+			We decided to make the constraints vary according to :  $h_{xb}\in\left\{\begin{pmatrix} 10 \\ 0\end{pmatrix}\, , \, \begin{pmatrix} 30 \\ 0\end{pmatrix}\, , \, \begin{pmatrix} 50 \\ 0\end{pmatrix}\, , \, \begin{pmatrix} 100 \\ 0\end{pmatrix}\right\}$. Figures (\ref{fig::xb_10}), (\ref{fig::xb_30}), (\ref{fig::xb_50}) and (\ref{fig::xb_100}) display the results obtained with such constraints. 
+			
+			\begin{figure}[ht!]
+			\begin{minipage}{0.45\linewidth}
+				\includegraphics[width=\linewidth]{xb_10}
+				\caption{Electrical power purchase and battery storage level ($N=30, \,  h^{max}_{xb}=10$))}
+				\label{fig::xb_10}
+			\end{minipage}
+			\hfill
+			\begin{minipage}{0.45\linewidth}
+				\includegraphics[width=\linewidth]{xb_30}
+				\caption{Electrical power purchase and battery storage level ($N=30, \, h^{max}_{xb}=100$))}
+				\label{fig::xb_30}
+			\end{minipage}
+			\end{figure}
+			\begin{figure}[ht!]
+			\begin{minipage}{0.45\linewidth}
+				\includegraphics[width=\linewidth]{xb_50}
+				\caption{Electrical power purchase and battery storage level ($N=30, \,  h^{max}_{xb}=50$))}
+				\label{fig::xb_50}
+			\end{minipage}
+			\hfill
+			\begin{minipage}{0.45\linewidth}
+				\includegraphics[width=\linewidth]{xb_100}
+				\caption{Electrical power purchase and battery storage level ($N=30, \, h^{max}_{xb}=100$))}
+				\label{fig::xb_100}
+			\end{minipage}
+		\end{figure}
+		
+		\paragraph{} For low (below 50) upper-bound constraints, the controller almost always drives the battery to saturation. As shown in the previous figures, the higher this constraint is, the more energy we are able to store during low-price times, and the less high-priced energy we will buy to heat the room. In an extremal case ($h^{max}_{xb}=100$ for instance), one can see that striclty no electricity is bought during high-price time, since the battery is able to store enough energy for it to heat the building enough during the whole day. 
+		}
 	}
 \end{document}

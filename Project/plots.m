@@ -1,4 +1,4 @@
-function plots(t,yt,ut,cpt,sbt,xbt,et,vt,flag)
+function plots(t,yt,ut,cpt,sbt,xbt,et,vt,flag,hxb)
  t = t./3; % Switches to hours 
  if (flag==1)
      figure; hold on;
@@ -101,5 +101,23 @@ function plots(t,yt,ut,cpt,sbt,xbt,et,vt,flag)
      xlabel('Hours');
      ylabel('Storage');
      legend('Battery Output Power','Stored Electrical Power','High/Low Price Time','Battery Output Power Constraints');
+ end
+ if (flag==5)
+       % Battery's state and purchased power    
+     figure;
+     subplot(2,1,1); hold on;
+     plot(t,et(1,:),'LineWidth',1.5,'Color','g');
+     plot(t,50*cpt,'-','LineWidth',1.5,'Color','r');
+     legend('Electrical Power Purchased','High/Low Price Time');
+     ylabel('Purchased Power');
+     xlabel('Hours');
+     subplot(2,1,2); hold on;
+     plot(t,vt(1,:),'-','LineWidth',1.5,'Color','b');
+     plot(t,xbt(1,:),'-','LineWidth',1.5,'Color','c');
+     plot(t,50*cpt,'-','LineWidth',1.5,'Color','r');
+     plot(t,[hxb;0].*ones(2,size(t,2)),'k-.','LineWidth',1.5);
+     xlabel('Hours');
+     ylabel('Storage');
+     legend('Battery Output Power','Stored Electrical Power','High/Low Price Time','Battery Storage Constraints');
  end
 end

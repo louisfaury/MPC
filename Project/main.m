@@ -3,7 +3,7 @@ close all;
 yalmip('clear')
 clear;
 
-%% Model data
+%% MODEL DATA
 load building.mat;
 load battery.mat;
 % Parameters of the Building Model
@@ -36,7 +36,7 @@ output = zeros(3,1);
 dist   = zeros(3,1);
 
 
-%% Controller Design (Setting-up MPC optimizer)
+%% CONTROLLER DESIGN (Setting-up MPC optimizer)
 % % Defines horizon 
 % N = 20;
 % % Defines sdpvars
@@ -126,7 +126,7 @@ dist   = zeros(3,1);
 % % Plots results
 % plots(t,yt,ut,cpt,0,0,0,0,2);
 
-%% Section 4 : Night setbacks
+%% SECTION 4 : Night setbacks
 % % Defines horizon 
 % N = 30;
 % % Defines sdpvars
@@ -158,40 +158,122 @@ dist   = zeros(3,1);
 % % Plots results 
 %  plots(t,yt,ut,cpt,sbt,0,0,0,3);
  
-%% Section 5 : Battery coupled with the building
-% Defines horizon 
-N = 30;
-% Defines sdpvars
-x       = sdpvar(10*ones(1,N),ones(1,N));
-u       = sdpvar(3*ones(1,N-1),ones(1,N-1));
-y       = sdpvar(3*ones(1,N),ones(1,N));
-d       = sdpvar(3*ones(1,N),ones(1,N));
-eps     = sdpvar(6*ones(1,N), ones(1,N));       % soft constraints 
-cp      = sdpvar(ones(1,N-1),ones(1,N-1));      % variable cost for e_k this time
-sb      = sdpvar(6*ones(1,N), ones(1,N));       % night setbacks
-xb      = sdpvar(ones(1,N), ones(1,N));         % battery storage
-e       = sdpvar(ones(1,N-1), ones(1,N-1));     % energy got from the grid
-v       = sdpvar(ones(1,N-1), ones(1,N-1));
-% Defines constraints over horizon as well as objective function 
-R_eps   = 1*eye(6,6);      % soft constraints penalty
-constraints = [];  
-objective   = 0;
-options = sdpsettings('verbose',1,'solver','+gurobi');   % Use Gurobi solver
-for i=2:N
-    constraints = [constraints, x{i} == A*x{i-1}+ Bu*u{i-1} + Bd*d{i-1}];
-    constraints = [constraints, y{i} == C*x{i}];
-    constraints = [constraints, Hy*y{i} <= sb{i} + eps{i}];
-    constraints = [constraints, eps{i} >= zeros(6,1)];
-    constraints = [constraints, Hu*u{i-1} <= hu];
-    constraints = [constraints, e{i-1} >= 0];
-    constraints = [constraints, v{i-1} == e{i-1} - ones(1,3)*u{i-1}];
-    constraints = [constraints, xb{i} == a*xb{i-1} + b*v{i-1}];
-    constraints = [constraints, Hxb*xb{i} <= hxb];
-    constraints = [constraints, Hv*v{i-1} <= hv];
-    objective = objective + cp{i-1}*e{i-1} + eps{i}'*R_eps*eps{i};
-end
-controller = optimizer(constraints,objective,options,{x{1}, xb{1}, [d{:}], [cp{:}], [sb{:}]},{[u{:}; v{:}; e{:}]});
-% Runs simulation
-[xt,yt,ut,t,cpt,sbt,et,xbt,vt] = simBuildStorage(controller, 576-N, @shiftPred, N);
-% Plots results 
- plots(t,yt,ut,cpt,sbt,xbt,et,vt,4);
+%% SECTION 5 : Battery coupled with the building
+% % Defines horizon 
+% N = 30;
+% % Defines sdpvars
+% x       = sdpvar(10*ones(1,N),ones(1,N));
+% u       = sdpvar(3*ones(1,N-1),ones(1,N-1));
+% y       = sdpvar(3*ones(1,N),ones(1,N));
+% d       = sdpvar(3*ones(1,N),ones(1,N));
+% eps     = sdpvar(6*ones(1,N), ones(1,N));       % soft constraints 
+% cp      = sdpvar(ones(1,N-1),ones(1,N-1));      % variable cost for e_k this time
+% sb      = sdpvar(6*ones(1,N), ones(1,N));       % night setbacks
+% xb      = sdpvar(ones(1,N), ones(1,N));         % battery storage
+% e       = sdpvar(ones(1,N-1), ones(1,N-1));     % energy got from the grid
+% v       = sdpvar(ones(1,N-1), ones(1,N-1));
+% % Defines constraints over horizon as well as objective function 
+% R_eps   = 1*eye(6,6);      % soft constraints penalty
+% constraints = [];  
+% objective   = 0;
+% options = sdpsettings('verbose',1,'solver','+gurobi');   % Use Gurobi solver
+% for i=2:N
+%     constraints = [constraints, x{i} == A*x{i-1}+ Bu*u{i-1} + Bd*d{i-1}];
+%     constraints = [constraints, y{i} == C*x{i}];
+%     constraints = [constraints, Hy*y{i} <= sb{i} + eps{i}];
+%     constraints = [constraints, eps{i} >= zeros(6,1)];
+%     constraints = [constraints, Hu*u{i-1} <= hu];
+%     constraints = [constraints, e{i-1} >= 0];
+%     constraints = [constraints, v{i-1} == e{i-1} - ones(1,3)*u{i-1}];
+%     constraints = [constraints, xb{i} == a*xb{i-1} + b*v{i-1}];
+%     constraints = [constraints, Hxb*xb{i} <= hxb];
+%     constraints = [constraints, Hv*v{i-1} <= hv];
+%     objective = objective + cp{i-1}*e{i-1} + eps{i}'*R_eps*eps{i};
+% end
+% controller = optimizer(constraints,objective,options,{x{1}, xb{1}, [d{:}], [cp{:}], [sb{:}]},{[u{:}; v{:}; e{:}]});
+% % Runs simulation
+% [xt,yt,ut,t,cpt,sbt,et,xbt,vt] = simBuildStorage(controller, 576-N, @shiftPred, N);
+% % Plots results 
+%  plots(t,yt,ut,cpt,sbt,xbt,et,vt,4);
+
+ %% SECTION 6 : several simulations with different battery properties 
+ % Varying the battery's dissipation factor
+%  alpha_array = [0.25 0.5 0.75 1];
+%  % Defines horizon
+%  N = 30;
+%  % Defines sdpvars
+%  x       = sdpvar(10*ones(1,N),ones(1,N));
+%  u       = sdpvar(3*ones(1,N-1),ones(1,N-1));
+%  y       = sdpvar(3*ones(1,N),ones(1,N));
+%  d       = sdpvar(3*ones(1,N),ones(1,N));
+%  eps     = sdpvar(6*ones(1,N), ones(1,N));       % soft constraints
+%  cp      = sdpvar(ones(1,N-1),ones(1,N-1));      % variable cost for e_k this time
+%  sb      = sdpvar(6*ones(1,N), ones(1,N));       % night setbacks
+%  xb      = sdpvar(ones(1,N), ones(1,N));         % battery storage
+%  e       = sdpvar(ones(1,N-1), ones(1,N-1));     % energy got from the grid
+%  v       = sdpvar(ones(1,N-1), ones(1,N-1));
+%  % Defines constraints over horizon as well as objective function
+%  R_eps   = 1*eye(6,6);      % soft constraints penalty
+%  options = sdpsettings('verbose',1,'solver','+gurobi');   % Use Gurobi solver
+%  for alpha = alpha_array
+%      objective   = 0;
+%      constraints = [];
+%      for i=2:N
+%          constraints = [constraints, x{i} == A*x{i-1}+ Bu*u{i-1} + Bd*d{i-1}];
+%          constraints = [constraints, y{i} == C*x{i}];
+%          constraints = [constraints, Hy*y{i} <= sb{i} + eps{i}];
+%          constraints = [constraints, eps{i} >= zeros(6,1)];
+%          constraints = [constraints, Hu*u{i-1} <= hu];
+%          constraints = [constraints, e{i-1} >= 0];
+%          constraints = [constraints, v{i-1} == e{i-1} - ones(1,3)*u{i-1}];
+%          constraints = [constraints, xb{i} == alpha*xb{i-1} + b*v{i-1}];
+%          constraints = [constraints, Hxb*xb{i} <= hxb];
+%          constraints = [constraints, Hv*v{i-1} <= hv];
+%          objective = objective + cp{i-1}*e{i-1} + eps{i}'*R_eps*eps{i};
+%      end
+%      controller = optimizer(constraints,objective,options,{x{1}, xb{1}, [d{:}], [cp{:}], [sb{:}]},{[u{:}; v{:}; e{:}]});
+%      % Runs simulation
+%      [xt,yt,ut,t,cpt,sbt,et,xbt,vt] = simBuildStorage(controller, 576-N, @shiftPred, N);
+%      % Plots results
+%      plots(t,yt,ut,cpt,sbt,xbt,et,vt,5);
+%  end
+ hxb_array = [[10 0]',[30 0]',[50,0]',[100,0]'];
+ % Defines horizon
+ N = 30;
+ % Defines sdpvars
+ x       = sdpvar(10*ones(1,N),ones(1,N));
+ u       = sdpvar(3*ones(1,N-1),ones(1,N-1));
+ y       = sdpvar(3*ones(1,N),ones(1,N));
+ d       = sdpvar(3*ones(1,N),ones(1,N));
+ eps     = sdpvar(6*ones(1,N), ones(1,N));       % soft constraints
+ cp      = sdpvar(ones(1,N-1),ones(1,N-1));      % variable cost for e_k this time
+ sb      = sdpvar(6*ones(1,N), ones(1,N));       % night setbacks
+ xb      = sdpvar(ones(1,N), ones(1,N));         % battery storage
+ e       = sdpvar(ones(1,N-1), ones(1,N-1));     % energy got from the grid
+ v       = sdpvar(ones(1,N-1), ones(1,N-1));
+ % Defines constraints over horizon as well as objective function
+ R_eps   = 1*eye(6,6);      % soft constraints penalty
+ options = sdpsettings('verbose',1,'solver','+gurobi');   % Use Gurobi solver
+ for hxb = hxb_array
+     objective   = 0;
+     constraints = [];
+     for i=2:N
+         constraints = [constraints, x{i} == A*x{i-1}+ Bu*u{i-1} + Bd*d{i-1}];
+         constraints = [constraints, y{i} == C*x{i}];
+         constraints = [constraints, Hy*y{i} <= sb{i} + eps{i}];
+         constraints = [constraints, eps{i} >= zeros(6,1)];
+         constraints = [constraints, Hu*u{i-1} <= hu];
+         constraints = [constraints, e{i-1} >= 0];
+         constraints = [constraints, v{i-1} == e{i-1} - ones(1,3)*u{i-1}];
+         constraints = [constraints, xb{i} == a*xb{i-1} + b*v{i-1}];
+         constraints = [constraints, Hxb*xb{i} <= hxb];
+         constraints = [constraints, Hv*v{i-1} <= hv];
+         objective = objective + cp{i-1}*e{i-1} + eps{i}'*R_eps*eps{i};
+     end
+     controller = optimizer(constraints,objective,options,{x{1}, xb{1}, [d{:}], [cp{:}], [sb{:}]},{[u{:}; v{:}; e{:}]});
+     % Runs simulation
+     [xt,yt,ut,t,cpt,sbt,et,xbt,vt] = simBuildStorage(controller, 576-N, @shiftPred, N);
+     % Plots results
+     plots(t,yt,ut,cpt,sbt,xbt,et,vt,5,hxb(1));
+ end
+ 
