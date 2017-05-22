@@ -1,4 +1,5 @@
 function plots(t,yt,ut,cpt,sbt,xbt,et,vt,flag,hxb)
+% Plot function for MPC project 
  t = t./3; % Switches to hours 
  if (flag==1)
      figure; hold on;
@@ -103,7 +104,7 @@ function plots(t,yt,ut,cpt,sbt,xbt,et,vt,flag,hxb)
      legend('Battery Output Power','Stored Electrical Power','High/Low Price Time','Battery Output Power Constraints');
  end
  if (flag==5)
-       % Battery's state and purchased power    
+     % Battery's state and purchased power    
      figure;
      subplot(2,1,1); hold on;
      plot(t,et(1,:),'LineWidth',1.5,'Color','g');
