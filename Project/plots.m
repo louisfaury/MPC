@@ -97,7 +97,7 @@ function plots(t,yt,ut,cpt,sbt,xbt,et,vt,flag,hxb)
      plot(t,vt(1,:),'-','LineWidth',1.5,'Color','b');
      plot(t,xbt(1,:),'-','LineWidth',1.5,'Color','c');
      plot(t,50*cpt,'-','LineWidth',1.5,'Color','r');
-     plot(t,[20;-20].*ones(2,size(t,2)),'k-.','LineWidth',1.5);
+     plot(t,repmat([-20;20],1, size(t,2)).*ones(2,size(t,2)),'k-.','LineWidth',1.5);
      xlabel('Hours');
      ylabel('Storage');
      legend('Battery Output Power','Stored Electrical Power','High/Low Price Time','Battery Output Power Constraints');
