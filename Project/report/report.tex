@@ -18,7 +18,7 @@
 	
 	\section{Introduction}
 	{
-		\paragraph{} This project aims at controlling the temperature inside a 3 room building. The full state and output dynamics are given by : 
+		\paragraph{} This project aims at controlling the temperature inside a three room building. The full state and output dynamics are given by : 
 		\begin{equation}
 			\begin{aligned}
 				x^+ &= Ax + B_uu + B_dd\\
@@ -36,7 +36,7 @@
 			\end{aligned}\right.
 		\end{equation}
 		
-		\paragraph{} The disturbance will be considered as an input, since we have its prediction over a period of 8 days. Figure (\ref{fig::temp_pred}) and (\ref{fig::gain_pred}) provides a plot of those predictive value. We can namely notice that we observe a \emph{\textcolor{red}{circadian periodicity}} (periodicity of 24h for the different signals). 
+		\paragraph{} The disturbances will be considered as an input, since we have their predicted values over a period of eight days. Figure (\ref{fig::temp_pred}) and (\ref{fig::gain_pred}) provides a plot of those predictive value. We can namely notice that we observe a \emph{\textcolor{red}{circadian periodicity}} (periodicity of 24h for the different signals). 
 		
 		\begin{figure}[h!]
 			\begin{minipage}{0.45\linewidth}
@@ -44,14 +44,15 @@
 				\caption{External temperature predictions}
 				\label{fig::temp_pred}
 			\end{minipage}
-			\begin{minipage}{0.45\linewidth}
+			\hfill
+			\begin{minipage}{0.47\linewidth}
 				\includegraphics[width=\linewidth]{gains_pred}
 				\caption{Solar and internal gain predictions}
 				\label{fig::gain_pred}
 			\end{minipage}
 		\end{figure}
 		
-		\paragraph{} The following sections implements different versions of model predictive controllers, considering different objectives : target tracking, cost minimization, storage cost, .. 
+		\paragraph{} The following sections implement different versions of model predictive controllers, considering different objectives : target tracking, cost minimization, storage cost, etc. 
 	}
 	
 	\section{First MPC Controller}
@@ -60,9 +61,9 @@
 		\begin{equation}
 			y_r = \begin{pmatrix} 24 & 24 & 24 \end{pmatrix}
 		\end{equation}
-		by optimizing the cost function : 
+		by optimizing the quadratic cost function : 
 		\begin{equation}
-			J = \sum_{n=1}^N (y_n-y_r)^T R (y-y_n)
+			J = \sum_{n=1}^N (y_n-y_r)^T R (y_n-y_r)
 		\end{equation}
 		under the following constraints : 
 		\begin{equation}
@@ -72,10 +73,10 @@
 				& u_n \leq 15, \quad & &n\in\{1,\hdots,N\} \\												& u_n \geq 0, \quad & &n\in\{1,\hdots,N\} \\
 			\end{aligned}
 		\end{equation}
-		In the following, $R$ is chosen to be $\mathds{1}_3$ (hence we are penalizing equally any fluctuations around the target value, independently of the room). Given a cost function, multiplying $R$ by a scalar value won't have any effect on the optimal solution. 
-		\newline We decided \emph{not to implement} a terminal cost nor terminal set constraints. This was mainly motivated by the fact that even with small horizons $N$, the system is \emph{experimentally} stable and recursively feasible. Hence, given the fact that the control invariant set could be computationally challenging to compute, and because its use would reduce the attraction zone in our state space, there was no real need to use terminal cost or terminal set. Moreover, the system is \emph{extremely reactive}, therefore we are able to reach, even with small horizons,  a cost that approximates the infinite horizon cost. 
+		In the following, $R$ is chosen to be $\mathds{I}_3$ (hence we are penalizing equally any fluctuations around the target value, independently of the room). Given the considered cost function, multiplying $R$ by a scalar value won't have any effect on the optimal solution. 
+		\newline We decided \emph{not to implement} a terminal cost nor terminal set constraints. This was mainly motivated by the fact that even with small horizons $N$, the system is \emph{experimentally} stable and recursively feasible. Hence, given the fact that the control invariant set could be challenging to compute, and because its use would reduce the size of the attraction zone in our state space, there was no real need to use terminal cost or terminal set. Moreover, the system is \emph{extremely reactive}, therefore we are able to reach, even with small horizons,  a cost that approximates the infinite horizon cost. 
 		
-		\paragraph{} Figures (\ref{fig::naivempc_N5_output}) and (\ref{fig::naivempc_N5_inputs}) respectively show the dynamics of the outputs and inputs of the systems control this MPC controller, given a horizon $N=5$, along their respective constraints and reference. 
+		\paragraph{} Figures (\ref{fig::naivempc_N5_output}) and (\ref{fig::naivempc_N5_inputs}) respectively show the dynamics of the outputs and inputs of the systems controlled by this MPC controller, given a horizon $N=5$, along their respective constraints and reference. 
 		
 		\begin{figure}[ht!]
 			\begin{minipage}{0.45\linewidth}
@@ -90,7 +91,7 @@
 				\label{fig::naivempc_N5_inputs}
 			\end{minipage}
 		\end{figure}
-		We can already note that all constraints are indeed verified. Because the disturbance is perfectly forecast (the disturbance applied is exactly the predicted one), the output tracking is done almost perfectly. We can indeed note that the temperature of the second room sometimes shows an overshoot. Because it is probably south-orientated, it is warmed up by the sun, which causes the room's temperature to rise, even if the input is zero. We can wonder what happens if we increase the prediction horizon so that the controller would be able to consider this raise in temperature. Figure (\ref{fig::naivempc_N20_output}) shows the rooms temperature for a controller of receeding horizon $N=20$. 
+		We can already note that all constraints are indeed verified. Because the disturbance is perfectly forecast (the disturbance applied is exactly the predicted one), the output tracking is done almost perfectly. We can indeed note that the temperature of the second room sometimes shows an overshoot. Because it is probably south-orientated, it warms up on sunny days, which causes the temperature of the room to rise, even for null input. We can wonder what happens if we increase the prediction horizon so that the controller would be able to consider this raise in temperature. Figure (\ref{fig::naivempc_N20_output}) shows the rooms temperature for a controller of receeding horizon $N=20$. 
 		\begin{figure}[ht!]
 			\begin{center}
 				\includegraphics[width=0.5\linewidth]{naivempc_N20_output}
@@ -99,7 +100,7 @@
 			\end{center}
 		\end{figure}
 		
-		\paragraph{} Because the controller is now able to consider the temperature rise due to the orientation of the room and the sun exposition, it allows a small undershoot by setting the corresponding input to 0 well before this event. Therefore, a smaller undershoot is achieved when increasing the horizon, , since the room slightly cooled down before being being exposed to the sun. 
+		\paragraph{} Because the controller is now able to anticipate the temperature rise due to the orientation of the room and the sun exposition, it allows a small undershoot by setting the corresponding input to 0 well before this event. Therefore, a smaller undershoot is achieved when increasing the horizon, since the room slightly cooled down before being exposed to the sun. 
 
 	}
    
@@ -143,7 +144,7 @@
 		\end{mini}
 		
 		\paragraph{} Figures (\ref{fig::soft_constraints_01}) and (\ref{fig::soft_constraints_10}) display the results obtained with this controller, given an horizon size $N=20$, with two different penalization coefficient $r_\eps$. 
-		\newline As one can expect, the retained solution's output stays near its lower bound, since this one corresponds to a lower cost. Also, by increasing the amplitude of the slack constraint amplitude, we reduce the size of the offset allowed by the tradeoff between constraints violation and cost minimization. 
+		\newline As one can expect, the retained solution's output stays near its lower bound, since this one corresponds to a lower cost. Also, by increasing the amplitude of the slack constraint penalization, we reduce the size of the offset allowed by the tradeoff between constraints violation and cost minimization. 
 		
 	}
 	
@@ -165,10 +166,11 @@
 
 		\paragraph{} We now wish to optimize a rather more realistic cost function, taking into account the variation of electricity prices. We consider the following model for the electricity prices : 
 		\begin{equation}
+		\left\{
 			\begin{aligned}
-				&c_k &= 0.2\$/kWh & &\quad \text{(between 12pm to 10am, and 4pm to 12pm)}\\
-				&c_k &= 0.04\$/kWh & &\quad \text{(between 10:00Hrs to 16:00Hrs)}
-			\end{aligned}
+				&c_k= 0.2\$/kWh & \quad&\text{between 12pm to 10am, and 4pm to 12pm}\\
+				&c_k = 0.04\$/kWh & \quad&\text{between 10am to 4pm}
+			\end{aligned}\right.
 		\end{equation}
 		This is achieved by specifying $c$ as a decision variable, provided at computation time. In the minimization problem, cost matrix is no longer constant so that it rewrites:
 				\begin{mini}|s|[2]
@@ -183,12 +185,12 @@
 				\end{mini}
 		 
 		where $C_n = [c_n, c_n, c_n]^T$.
-		\paragraph{} In the following, we consider $r_\eps = 1$ as well as $N = 20$. Figure (\ref{fig::var_cost_output}) displays the evolution of temperature given this control strategy. We can namely see that, starting a few hours before the days rises, the temperature in the office increases before dropping. Figure (\ref{fig::var_cost_inputs}) gives a better insight at what is going on in the controller (for room 1). Indeed, we see that at the end of the night, the controller is provided with the prediction that the cost is soon to go up. To enable the constraints to be (softly) satisfied, without having to pay for expensive electricity in the morning, it peaks the input to warm up the different rooms. Therefore, during the day, it only has to buy a small amount of power to keep the temperature near its feasible region. 
+		\paragraph{} In the following, we consider $r_\eps = 1$ as well as $N = 20$. Figure (\ref{fig::var_cost_output}) displays the evolution of the temperature of the room given this control strategy. We can namely see that, starting a few hours before the day rises, the temperature in the office increases before dropping. Figure (\ref{fig::var_cost_inputs}) gives a better insight at what is going on in the controller (for room 1). Indeed, we see that by the end of the night, the controller is provided with the prediction that the cost is soon to go up. To enable the constraints to be (softly) satisfied, without having to pay for expensive electricity in the morning, it peaks the input to warm up the different rooms. Therefore, during the day, it only has to buy a small amount of power to keep the temperature near its feasible region. 
 	}
 	
 	\section{Night Setbacks}
 	{
-		\paragraph{} We will now implement time varying comfort constraints. The ideao is that outside of office hours, we would like to relax the output's constraints in order to safe money by avoiding unnecessary heating. Practically, we will consider the following constraints : 
+		\paragraph{} We will now implement time varying comfort constraints. The idea is that outside of office hours, we would like to relax the output's constraints in order to save money by avoiding unnecessary heating. Practically, we will consider the following constraints : 
 		\begin{equation}
 		\left\{
 			\begin{aligned}
@@ -200,7 +202,7 @@
 		\end{equation}
 		
 		
-		Minimization problem therefore becomes:
+		The minimization problem therefore becomes:
 		
 						\begin{mini}|s|[2]
   			{}{\sum_{n=1}^N\left[C_n^Tu_n +  r_\eps(\lVert \eps_n\rVert_2 +\lVert\hat{ \eps}_n\rVert_2)\right]}
@@ -228,9 +230,9 @@
 		\end{figure}
 
 
-		\paragraph{} Figures (\ref{fig::temp_setback}) and (\ref{fig::inputs_setback})  respectively display the output (temperature) for the three different rooms (with the time varying constraints), as well as the input the the first room (alongside the cost zones). 
-		\newline As one can notice, the temperature constraints are still met. More importantly, the controller let the temperature drop for most of the night (when no one is in office), before strongly heating  the building (taking advantage of the low cost of electricity by the end of the night). The temperature then drops when the employees begin in order to meet the actualized constraints. 
-		\newline A slightly different behavior can be observed by the end of the available prediction time. Indeed, near hour 130, we can see that the controller imposes (unusual) stronger inputs in the morning. Indeed, because at that moment the solar gain are fairly weak and the outside temperature is rather cold, the controller needs to impose higher temperature in the morning before allowing it top drop to the lower-bound constraint. 
+		\paragraph{} Figures (\ref{fig::temp_setback}) and (\ref{fig::inputs_setback})  respectively display the output (temperature) for the three different rooms (with the time varying constraints), as well as the input for the first room (alongside the cost zones). 
+		\newline As one can notice, the temperature constraints are still met. More importantly, the controller let the temperature drop for most of the night (when no one is in office), before strongly heating  the building (taking advantage of the low cost of electricity by the end of the night). The temperature then drops when the employees arrive in order to meet the actualized constraints. 
+		\newline A slightly different behavior can be observed by the end of the available prediction time. Indeed, near hour 130, we can see that the controller imposes (unusual) stronger inputs in the morning. Indeed, because at that moment the solar gain are fairly weak and the outside temperature is rather cold, the controller needs to impose higher temperature in the morning before allowing it to drop to the lower-bound constraint. 
 	}
 	
 	\section{Battery storage}
@@ -261,7 +263,7 @@
 			\end{center}
 		\end{figure}
 		
-		\paragraph{} Figures (\ref{fig::battery_purchase}) and (\ref{fig::battery_charge}) respectively display the power purchased from the grid and the charging power / capacity of the battery, along with the variation of the electrical power price. As expected, when internal gains, solar exposition, etc. allow it, most of the power is purchased when the price is low. Indeed, unlike when we did not consider this electricity buffer, some power was still needed during the day, when now almost none is bought at this period (this assertion becomes false when the battery storage is not high to prevent temperature drops in the day - starting near hour 130). 
+		\paragraph{} Figures (\ref{fig::battery_purchase}) and (\ref{fig::battery_charge}) respectively display the power purchased from the grid and the charging power / capacity of the battery, along with the variation of the electrical power price. As expected, when internal gains, solar exposition, etc. allow it, most of the power is purchased when the price is low. Indeed - and unlike when we did not consider this electricity buffer - some power was still needed during the day when now almost none is bought at this period (this assertion becomes false when the battery storage is not large enough to prevent temperature drops in the day - starting near hour 130). 
 		\newline Also, one can notice that when electrical power is purchased, it is either used to directly warm the building or is stored in the battery. The battery discharges during the day, using the low price electricity that was bought the day before (figure (\ref{fig::battery_charge})). 
 		
 		\paragraph{} Figures (\ref{fig::temp_battery}) shows the system's output (temperature) variations. If we compare it with figures (\ref{fig::temp_setback}), we see that there is no more need for extreme (near saturation) heating by the end of the night. The controller simply needs to charge up the battery at night (it also warms the building to match the nighttime temperature constraints) and discharge the battrey during the day to keep the output inside its feasible region. The temperature in the building remains in the employees comfort zone, with much smoother dynamics. 
@@ -269,8 +271,8 @@
 		\subsection{Varying the battery's constraints}
 		{
 			\paragraph{} We now wish to vary two of the battery's characteristics : its dissipation factor $\alpha$ as well as its capacity $\tilde{x}$. 
-			\paragraph{} We expect that as $\alpha$ will get close to 1, the battery will tend to charge  to its maximum capacity at an arbitrary time during a low price time (since their is no loss of energy due to dissipation). However, as $\alpha$ goes to 0, we expect that the controller will wait untill the very end of the low-price time to charge the battery, in order to be able to use most of it during the high-price time, without losing a fairly sizable portion of it in dissipation. 
-			\paragraph{} If we increase the capacity of the battery, we expect the controller to continue charging the battery up to its saturation during low-price times. However, we might reach a point where the capacity of the battery exceed the needs of the controller - at that point, we won't need to reach the battery's saturation. Also, as we decrease the capacity of the controller, the controller will need to buy more high-price electricity to directly heat the building. 
+			\paragraph{} We expect that as $\alpha$ will get close to 1, the battery will tend to charge  to its maximum capacity at an arbitrary time during a low price time (since their is no loss of energy due to dissipation). However, as $\alpha$ goes to 0, we expect that the controller will wait until the very end of the low-price time to charge the battery, in order to be able to use most of it during the high-price time, without losing a fairly sizable portion of it in dissipation. 
+			\paragraph{} If we increase the capacity of the battery, we expect the controller to continue charging the battery up to its saturation during low-price times. However, we might reach a point where the capacity of the battery exceeds the needs of the controller - at that point, we won't need to reach the battery's saturation. Also, as we decrease the capacity of the controller, the controller will need to buy more high-price electricity to directly heat the building. 
 			
 			\paragraph{} We first decided to make the dissipation term $\alpha$ vary in $\{0.25,0.5,0.75,1\}$. Figures (\ref{fig::alpha_025}), (\ref{fig::alpha_05}), (\ref{fig::alpha_075}) and (\ref{fig::alpha_1}) display the corresponding results. The battery storage upper-bound was kept at its nominal value. 
 			
@@ -301,7 +303,7 @@
 			\end{minipage}
 		\end{figure}
 		
-		\paragraph{} We can see that for a very low dissipation factor ($\alpha = 0.25$), the controller does not bother charging the battery when the forecast announces sun (first 130 hours). Indeed, charging the battery is not relevant since most of the power will be lost in dissipation. Actually, in this setting, the temperature dissipation in the room is slower, hence it is more relevant to directly heat the room. As $\alpha$ increases, more and more power is stored in the battery. For the extreme case where $\alpha=1$, there is very few power bought during high-price time. Also, one can see that in this case where there is no dissipation, the battery charge as soon as the electricity price drop. It reaches it maximum before the beginning of the high-price time-zone, to be used to heat the room afterwards. Finally, we notice that the total energy bill decreases when $\alpha$ increases due to the ability to the battery storage to begin accumulating energy sooner and therefore to better anticipate high price periods.
+		\paragraph{} We can see that for a very low dissipation factor ($\alpha = 0.25$), the controller does not bother charging the battery when the forecast announces sun (first 130 hours). Indeed, charging the battery is not relevant since most of the power will be lost in dissipation. Actually, in this setting, the temperature dissipation in the room is slower, hence it is more relevant to directly heat the room. As $\alpha$ increases, more and more power is stored in the battery. For the extreme case where $\alpha=1$, there is very few power bought during high-price time. Also, one can see that in this case where there is no dissipation, the battery charge as soon as the electricity price drops. It reaches its maximum before the beginning of the high-price time-zone, to be used to heat the room afterwards. Finally, we notice that the total energy bill decreases when $\alpha$ increases due to the ability of the battery storage to begin accumulating energy sooner and therefore to better anticipate high price periods.
 			
 			\paragraph{} We set back $\alpha=0.98$ (nominal setting) and decided to vary the battery storage limit. Recall that the storage $xb$ complies with : 
 			\begin{equation}
@@ -338,7 +340,7 @@
 		
 		\paragraph{} For low (below 50) upper-bound constraints, the controller almost always drives the battery to saturation. As shown in the previous figures, the higher this constraint is, the more energy we are able to store during low-price times, and the less high-priced energy we will buy to heat the room. In an extremal case ($h^{max}_{xb}=100$ for instance), one can see that striclty no electricity is bought during high-price time, since the battery is able to store enough energy for it to heat the building enough during the whole day. 
 		
-		\paragraph{} Ultimately, we see that increasing the battery storage capacity leads to bigger economies due to the lesser necessity to pay expensive electricity. When designing the heating system for a building, one should therefore find the good compromise: a high capacity battery with low loss is expensive to buy and maintain but will tend to decrease the energy bill of the building.
+		\paragraph{} Ultimately, we see that increasing the battery's storage capacity leads to bigger savings due to the lesser necessity to pay expensive electricity. When designing the heating system for a building, one should therefore find the good compromise: a high capacity battery with low loss is expensive to buy and maintain but will tend to decrease the energy bill of the building.
 		
 		}
 	}
