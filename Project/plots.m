@@ -1,4 +1,5 @@
 function plots(t,yt,ut,cpt,sbt,xbt,et,vt,flag,hxb)
+% Plot function for MPC project 
  t = t./3; % Switches to hours 
  if (flag==1)
      figure; hold on;
